@@ -14,13 +14,37 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.qwerty.curtaincall.MainActivity"
+            android:name="com.qwerty.curtaincall.SplashScreen"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.qwerty.curtaincall.PlaySelector"
+            android:label="@string/title_activity_play_selector"
+            android:parentActivityName="com.qwerty.curtaincall.SplashScreen" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.qwerty.curtaincall.SplashScreen" />
+        </activity>
+        <activity
+            android:name="com.qwerty.curtaincall.ChunkSelector"
+            android:label="@string/title_activity_chunk_selector"
+            android:parentActivityName="com.qwerty.curtaincall.PlaySelector" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.qwerty.curtaincall.PlaySelector" />
+        </activity>
+        <activity
+            android:name="com.qwerty.curtaincall.RecordEdit"
+            android:label="@string/title_activity_record_edit"
+            android:parentActivityName="com.qwerty.curtaincall.ChunkSelector" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.qwerty.curtaincall.ChunkSelector" />
         </activity>
     </application>
 
