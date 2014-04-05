@@ -5,8 +5,6 @@ import android.app.Activity;
 import android.view.Menu;
 
 public class MainActivity extends Activity {
-
-	// Vinit testing commit!
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
