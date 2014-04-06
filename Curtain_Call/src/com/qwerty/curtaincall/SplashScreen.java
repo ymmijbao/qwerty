@@ -19,6 +19,17 @@ public class SplashScreen extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.splash_screen);
 		addListenerOnButton();
+		
+		Button playSelectorButton = (Button) findViewById(R.id.button2);
+		playSelectorButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent myIntent = new Intent(SplashScreen.this, PlaySelector.class);
+				SplashScreen.this.startActivity(myIntent);	
+			}
+		});
+		
 	}
 
 	@Override
