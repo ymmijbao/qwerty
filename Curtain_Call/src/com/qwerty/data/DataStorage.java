@@ -2,6 +2,7 @@ package com.qwerty.data;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -22,16 +23,16 @@ import android.util.Log;
 public class DataStorage {
 
 	/**
-	 * Add a new play to the storage Returns 0 if the save was successful, 1
+	 * Add a new play to the storage Returns 0 if the save was successful, -1
 	 * otherwise
 	 * 
 	 * @param play
 	 *            Name of the play to be saved
 	 * @throws JSONException
-	 * @throws FileNotFoundException
+	 * @throws IOException 
 	 */
 	public static int addPlay(String play) throws JSONException,
-			FileNotFoundException {
+			IOException {
 		String fileDirPath = getJsonDirectory();
 		File f = new File(fileDirPath + "/play.txt");
 		JSONObject jsonObject = new JSONObject();
@@ -43,7 +44,7 @@ public class DataStorage {
 
 			jsonObject = new JSONObject(content);
 			if (jsonObject.has(play)) {
-				return 1;
+				return -1;
 			}
 		} else {
 			File file = new File(Environment.getExternalStoragePublicDirectory(
@@ -54,6 +55,9 @@ public class DataStorage {
 		try {
 			File nextPlay = new File(getJsonDirectory() + "/plays/");
 			nextPlay.mkdirs();
+			nextPlay = new File(nextPlay.getAbsolutePath()+"/play_" + play
+					+ ".txt");
+			nextPlay.createNewFile();
 			jsonObject.put(play, nextPlay.getAbsolutePath() + "/play_" + play
 					+ ".txt");
 			writeToFile("Play", jsonObject.toString());
@@ -66,6 +70,49 @@ public class DataStorage {
 		return 0;
 	}
 
+	
+	/**
+	 * Add a chunk to the given parent play at given position
+	 * Cannot have duplicate chunk names.
+	 * Returns 0 if successful, -1 otherwise.
+	 */
+	public static int addChunk(String chunk, String parent, int position)
+			throws FileNotFoundException, JSONException, UnsupportedEncodingException {
+		String dir = getJsonDirectory();
+		dir += "/plays/play_" + parent + ".txt";
+		
+		File f = new File(dir);
+		if (!f.exists()) {
+			return -1;
+		}
+		Log.d("TAGGIN", f.getAbsolutePath());
+		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+				.useDelimiter("\\Z");
+
+		
+		JSONObject chunks = new JSONObject();
+		
+		// Check if file is empty
+		if (scanner.hasNext()) {
+			chunks = new JSONObject(scanner.next());
+			
+			if (chunks.has(chunk)) {
+				return -1;
+			}
+			
+		}
+		
+		JSONObject lineObject = new JSONObject();
+		lineObject.put("position", position);
+		lineObject.put("lines", new JSONObject());
+		
+		chunks.put(chunk, lineObject);
+		
+		writeToFile("plays/play_"+parent, chunks.toString());
+		return 0;
+	}
+	
+	
 	/**
 	 * Returns a list of all plays the user has added.
 	 * 
