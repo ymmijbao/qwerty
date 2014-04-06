@@ -1,6 +1,7 @@
 package com.qwerty.curtaincall;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -11,6 +12,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -97,12 +100,21 @@ public class PlaySelector extends Activity implements OnClickListener {
     			    
     			    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
     			    	public void onClick(DialogInterface dialog, int whichButton) {
-    	                	Toast.makeText(PlaySelector.this, "Play Deleted", Toast.LENGTH_SHORT).show();
-    	                	LinearLayout layout = (LinearLayout) findViewById(R.id.scrollViewLinLayout);
-    	                	if (viewTouched != null) {
-    	                		layout.removeView(viewTouched);
-    	                		viewTouched = null;
-    	                	}
+    	                	final LinearLayout layout = (LinearLayout) findViewById(R.id.scrollViewLinLayout);
+    	                	final Animation animation = AnimationUtils.loadAnimation(PlaySelector.this, android.R.anim.slide_out_right); 
+    	                    viewTouched.startAnimation(animation);
+    	                    Handler handle = new Handler();
+    	                    handle.postDelayed(new Runnable() {
+    	               
+    	                      @Override
+    	                        public void run() {
+    	                    	  	if (viewTouched != null) {
+    	                    	  		layout.removeView(viewTouched);
+    	                    	  		viewTouched = null;
+    	                    	  	}
+    	                            animation.cancel();
+    	                        }
+    	                    }, 300);
     			        }
     			    });
 
