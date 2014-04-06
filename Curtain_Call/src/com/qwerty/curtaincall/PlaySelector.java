@@ -1,6 +1,7 @@
 package com.qwerty.curtaincall;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -11,6 +12,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -23,6 +26,7 @@ public class PlaySelector extends Activity implements OnClickListener {
 	private RelativeLayout mainLayout;
 	private LinearLayout scrollLinLayout;
 	private GestureDetector gestureDetector;
+	private View viewTouched;
 	View.OnTouchListener gestureListener;
 	
 	@Override
@@ -33,9 +37,10 @@ public class PlaySelector extends Activity implements OnClickListener {
 		mainLayout = (RelativeLayout) findViewById(R.id.playSelectorLayout);
 		scrollLinLayout = (LinearLayout) findViewById(R.id.scrollViewLinLayout);
 		
-		gestureDetector = new GestureDetector(getApplicationContext(), new MyGestureDetector());
+		gestureDetector = new GestureDetector(PlaySelector.this, new MyGestureDetector());
         gestureListener = new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
+            	viewTouched = v;
                 return gestureDetector.onTouchEvent(event);
             }
         };
@@ -46,17 +51,23 @@ public class PlaySelector extends Activity implements OnClickListener {
 			@Override
 			public void onClick(View v) {
 				final Button newPlay = new Button(PlaySelector.this);
-				newPlay.setBackgroundColor(Color.RED);
+				newPlay.setBackgroundColor(0xfffaebd7);
+				newPlay.setOnClickListener(PlaySelector.this);
+				newPlay.setOnTouchListener(gestureListener);
 				
+				final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+				layoutParams.setMargins(0, 10, 0, 0);
 				
 			    AlertDialog.Builder alert = new AlertDialog.Builder(PlaySelector.this);
 			    final EditText input = new EditText(PlaySelector.this);
+			    input.setHint("Play Name");
 			    alert.setView(input);
-			    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			        public void onClick(DialogInterface dialog, int whichButton) {
 			            String value = input.getText().toString().trim();
 			            newPlay.setText(value);
-			            scrollLinLayout.addView(newPlay);
+			            scrollLinLayout.addView(newPlay, layoutParams);
+			            // Launch the RecordEdit or the ChunkSelector activity
 			        }
 			    });
 
@@ -82,29 +93,54 @@ public class PlaySelector extends Activity implements OnClickListener {
             try {
                 if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) return false;
 
-                if (e1.getX() - e2.getX() > SWIPE_MIN_DIST && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                	Toast.makeText(PlaySelector.this, "Left SWIPE", Toast.LENGTH_SHORT).show();
-                } else if (e2.getX() - e1.getX() > SWIPE_MIN_DIST && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                	Toast.makeText(PlaySelector.this, "Right SWIPE", Toast.LENGTH_SHORT).show();
-                	RelativeLayout layout = (RelativeLayout) findViewById(R.id.playSelectorLayout);
-                    TextView test = (TextView) findViewById(R.id.textView1);
-                    layout.removeView(test);
+                if (e2.getX() - e1.getX() > SWIPE_MIN_DIST && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                	/** Adding a Alert Dialog to ask the user if he/she really wants to delete the play **/
+    			    AlertDialog.Builder alert = new AlertDialog.Builder(PlaySelector.this);
+    			    alert.setMessage("Permanently delete play?");
+    			    
+    			    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+    			    	public void onClick(DialogInterface dialog, int whichButton) {
+    	                	final LinearLayout layout = (LinearLayout) findViewById(R.id.scrollViewLinLayout);
+    	                	final Animation animation = AnimationUtils.loadAnimation(PlaySelector.this, android.R.anim.slide_out_right); 
+    	                    viewTouched.startAnimation(animation);
+    	                    Handler handle = new Handler();
+    	                    handle.postDelayed(new Runnable() {
+    	               
+    	                      @Override
+    	                        public void run() {
+    	                    	  	if (viewTouched != null) {
+    	                    	  		layout.removeView(viewTouched);
+    	                    	  		viewTouched = null;
+    	                    	  	}
+    	                            animation.cancel();
+    	                        }
+    	                    }, 300);
+    			        }
+    			    });
+
+    			    alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+    			        public void onClick(DialogInterface dialog, int whichButton) {
+    			            dialog.cancel();
+    			        }
+    			    });
+    			    
+    			    alert.show();    	
                 }
-                
             } catch (Exception e) {
                 // Do nothing
             }
+            
             return false;
         }
 
         @Override
         public boolean onDown(MotionEvent e) {
-              return true;
+        	return true;
         }
     }
 
 	@Override
 	public void onClick(View v) {
-		// TODO Auto-generated method stub
+		System.out.println("TEST");
 	}
 }
