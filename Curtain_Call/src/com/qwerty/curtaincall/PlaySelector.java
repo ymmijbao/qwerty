@@ -46,17 +46,20 @@ public class PlaySelector extends Activity implements OnClickListener {
 			@Override
 			public void onClick(View v) {
 				final Button newPlay = new Button(PlaySelector.this);
-				newPlay.setBackgroundColor(Color.RED);
+				newPlay.setBackgroundColor(0xfffaebd7);
 				
+				final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+				layoutParams.setMargins(0, 10, 0, 0);
 				
 			    AlertDialog.Builder alert = new AlertDialog.Builder(PlaySelector.this);
 			    final EditText input = new EditText(PlaySelector.this);
+			    input.setHint("Play Name");
 			    alert.setView(input);
-			    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			        public void onClick(DialogInterface dialog, int whichButton) {
 			            String value = input.getText().toString().trim();
 			            newPlay.setText(value);
-			            scrollLinLayout.addView(newPlay);
+			            scrollLinLayout.addView(newPlay, layoutParams);
 			        }
 			    });
 
