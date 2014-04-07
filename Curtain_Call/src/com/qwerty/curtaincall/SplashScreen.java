@@ -30,6 +30,16 @@ public class SplashScreen extends Activity {
 			}
 		});
 		
+		Button rehearseSelectorButton = (Button) findViewById(R.id.button3);
+		rehearseSelectorButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent myIntent = new Intent(SplashScreen.this, RehearseActivity.class);
+				SplashScreen.this.startActivity(myIntent);	
+			}
+		});
+		
 	}
 
 	@Override
