@@ -10,8 +10,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 public class RecordEdit extends Activity {
+	
+	private RelativeLayout mainLayout;
+	private LinearLayout scrollLinLayout;
 	
 	Button me;
 	Button them;
@@ -22,6 +28,10 @@ public class RecordEdit extends Activity {
 		setContentView(R.layout.record_edit);
 		// Show the Up button in the action bar.
 		setupActionBar();
+		
+		// assign the layouts to the private vars
+		mainLayout = (RelativeLayout) findViewById(R.id.recordEditLayout);
+		scrollLinLayout = (LinearLayout) findViewById(R.id.recordEditLinearLayout);
 		
 		// grab the intent
 		Intent intent = getIntent();
@@ -75,8 +85,17 @@ public class RecordEdit extends Activity {
 			   public boolean onTouch(View v, MotionEvent event) {
 			       if(event.getAction() == MotionEvent.ACTION_DOWN) {
 			    	   System.out.println("me button pressed down");
+			    	   Toast.makeText(getApplicationContext(), "Recording your line...", Toast.LENGTH_SHORT).show();
 			       } else if (event.getAction() == MotionEvent.ACTION_UP) {
 			    	   System.out.println("me button release");
+			    	   Toast.makeText(getApplicationContext(), "Line saved.", Toast.LENGTH_SHORT).show();
+			    	   final Button newLine = new Button(RecordEdit.this);
+			    	   newLine.setBackgroundColor(0xfffaebd7);
+			    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+			    	   layoutParams.setMargins(0, 10, 0, 0);
+			    	   String value = "Me: I am taking a selfie Romeo! Why are you so needy?";
+			           newLine.setText(value);
+			           scrollLinLayout.addView(newLine, layoutParams);
 			       }
 			       return true;
 			   }
@@ -93,8 +112,17 @@ public class RecordEdit extends Activity {
 			   public boolean onTouch(View v, MotionEvent event) {
 			       if(event.getAction() == MotionEvent.ACTION_DOWN) {
 			    	   System.out.println("them button pressed down");
+			    	   Toast.makeText(getApplicationContext(), "Recording their line...", Toast.LENGTH_SHORT).show();
 			       } else if (event.getAction() == MotionEvent.ACTION_UP) {
 			    	   System.out.println("them button release");
+			    	   Toast.makeText(getApplicationContext(), "Line saved.", Toast.LENGTH_SHORT).show();
+			    	   final Button newLine = new Button(RecordEdit.this);
+			    	   newLine.setBackgroundColor(0xfffaebd7);
+			    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+			    	   layoutParams.setMargins(0, 10, 0, 0);
+			    	   String value = "Romeo: where art Juliet? Thy Juliet hast afk?";
+			    	   newLine.setText(value);
+			    	   scrollLinLayout.addView(newLine, layoutParams);
 			       }
 			       return true;
 			   }
