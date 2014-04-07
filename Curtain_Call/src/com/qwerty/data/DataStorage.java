@@ -142,6 +142,88 @@ public class DataStorage {
 		}
 		return playList;
 	}
+	
+	/**
+	 * Deletes the current play and all information associated with it.
+	 * @return
+	 * @throws JSONException 
+	 * @throws FileNotFoundException 
+	 */
+	public static int deletePlay(String parent) throws JSONException, FileNotFoundException {
+		String dir = getJsonDirectory();
+		dir += "/plays/play_" + parent + ".txt";
+		
+		File f = new File(dir);
+		if (!f.exists()) {
+			return -1;
+		}
+
+		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+		.useDelimiter("\\Z");
+
+
+		JSONObject chunks = new JSONObject();
+
+		if (scanner.hasNext()) {
+			Log.d("TAG", "FUCKTHIS");
+
+			chunks = new JSONObject(scanner.next());
+			Iterator<String> chunkList = chunks.keys();
+			// For each chunk in the play, we iterate over each line for that chunk,
+			// deleting each audio file associated with a line
+			while (chunkList.hasNext()) {
+				String currentChunk = chunkList.next();
+				JSONObject obj = chunks.getJSONObject(currentChunk);
+				
+				Iterator<String> lineIterator= ((JSONObject) obj.get("lines")).keys();
+				
+				while (lineIterator.hasNext()) {
+					// Get each line audio file and delete it from the device.
+				}
+			}
+			scanner.close();
+			boolean deleteSuccess = f.delete();
+			
+			if (!deleteSuccess) {
+				return -1;
+			}
+		}
+		
+		return 0;
+	}
+	
+	/**
+	 * Returns a list of all chunks of the given playName.
+	 * 
+	 * @throws JSONException
+	 * @throws FileNotFoundException
+	 */
+	public static ArrayList<String> getAllChunks(String parent) throws JSONException,
+			FileNotFoundException {
+		ArrayList<String> chunkList = new ArrayList<String>();
+		String dir = getJsonDirectory();
+		dir += "/plays/play_" + parent + ".txt";
+		
+		File f = new File(dir);
+		if (f.exists()) {
+			Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+			.useDelimiter("\\Z");
+		
+			
+			JSONObject chunks = new JSONObject();
+			
+			// Check if file is empty
+			if (scanner.hasNext()) {
+				chunks = new JSONObject(scanner.next());
+				Iterator<String> i = chunks.keys();
+				
+				while (i.hasNext()) {
+					chunkList.add(i.next());
+				}
+			}
+		}
+		return chunkList;
+	}
 
 	/**
 	 * Gets the public directory for where all data is stored
