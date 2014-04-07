@@ -1,0 +1,159 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/white"
+    tools:context=".RehearseActivity" >
+    
+    <!-- Title of play and scene -->
+    <TextView
+        android:id="@+id/text_play_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textSize="30sp"
+        android:text="Romeo and Juliet" />
+    
+    <TextView
+        android:id="@+id/text_scene_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_play_title"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="25dp"
+        android:textSize="45sp"
+        android:text="Act 5" />
+    
+	<!-- Scrollview displaying the scene's lines. -->
+	<ScrollView
+	    android:id="@+id/view_lines"
+	    android:layout_width="match_parent"
+	    android:layout_height="300dp"
+	    android:layout_below="@id/text_scene_title"
+	    android:layout_centerHorizontal="true"
+	    android:padding="5dp"
+	    android:background="@drawable/scrollview_rounded_corners" >
+	    
+	    <TableLayout
+	        android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:orientation="vertical" >
+	    	
+	        <TableRow
+	            android:layout_width="wrap_content"
+        		android:layout_height="wrap_content"
+        		android:background="@color/yellow" >
+        		
+			    <TextView
+			        android:id="@+id/text_line1_character"
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:layout_marginLeft="5dp"
+				    android:layout_marginRight="5dp"
+				    android:textSize="20sp"
+				    android:textStyle="bold"
+				    android:text="Hamlet:" />
+			    
+			    <TextView
+			        android:id="@+id/text_line1_line"
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:layout_marginLeft="5dp"
+				    android:layout_marginRight="5dp"
+				    android:textSize="20sp"
+				    android:text="To be or not to be? That is the question. Blah blah blah. Where art thou, Romeo? Blah blah blah." />
+			    
+			</TableRow>
+			
+	        <TableRow
+	            android:layout_width="wrap_content"
+        		android:layout_height="wrap_content" >
+			    
+			    <TextView
+				    android:id="@+id/text_line2_character"
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:layout_marginLeft="5dp"
+				    android:layout_marginRight="5dp"
+				    android:textSize="20sp"
+				    android:textStyle="bold"
+				    android:text="Othello:" />
+			    
+			    <TextView
+				    android:id="@+id/text_line2_line"
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:layout_marginLeft="5dp"
+				    android:layout_marginRight="5dp"
+				    android:textSize="20sp"
+				    android:text="I pledge allegiance to the flag of the United States of America." />
+			    
+			</TableRow>
+			
+	        <TableRow
+	            android:layout_width="wrap_content"
+        		android:layout_height="wrap_content" >
+			    
+	            <TextView
+				    android:id="@+id/text_line3_character"
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:layout_marginLeft="5dp"
+				    android:layout_marginRight="5dp"
+				    android:textSize="20sp"
+				    android:textStyle="bold"
+				    android:text="Hamlet:" />
+	            
+	            <TextView
+				    android:id="@+id/text_line3_line"
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:layout_marginLeft="5dp"
+				    android:layout_marginRight="5dp"
+				    android:textSize="20sp"
+				    android:text="You a stupid hoe, you a you a stupid hoe." />
+	            
+			</TableRow>
+			
+	    </TableLayout>
+	    
+	</ScrollView>
+   
+    <!-- Start playback, starting from the currently selected line. -->
+    <ImageButton
+        android:id="@+id/button_play"
+        android:contentDescription="@string/button_play"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@id/view_lines"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="60dp"
+        android:background="@drawable/play_button" />
+    
+    <!-- Skip to the previous scene in the script. -->
+    <Button
+        android:id="@+id/button_previous_scene"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/button_rounded_corners"
+        android:textSize="30dp"
+        android:text="@string/button_previous_scene" />
+    
+    <!-- Skip to the next scene in the script. -->
+    <Button
+        android:id="@+id/button_next_scene"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/button_rounded_corners"
+        android:textSize="30dp"
+        android:text="@string/button_next_scene" />
+	
+</RelativeLayout>

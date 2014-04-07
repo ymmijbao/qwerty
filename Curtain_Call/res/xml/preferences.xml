@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Omit my lines -->
+    <CheckBoxPreference
+        android:key="pref_omit_my_lines"
+        android:title="@string/pref_omit_my_lines"
+        android:summary="@string/pref_omit_my_lines_summ"
+        android:defaultValue="true" />
+    
+    <!-- Line accuracy feedback -->
+    <CheckBoxPreference
+        android:key="pref_line_feedback"
+        android:title="@string/pref_line_feedback"
+        android:summary="@string/pref_line_feedback_summ"
+        android:defaultValue="true" />
+    
+</PreferenceScreen>

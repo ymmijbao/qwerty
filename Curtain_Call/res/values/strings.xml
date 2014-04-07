@@ -4,5 +4,19 @@
     <string name="app_name">Curtain Call</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_rehearse">RehearseActivity</string>
+    <string name="title_activity_rehearse_settings">RehearseSettingsActivity</string>
+    
+    <!-- Settings options -->
+    <string name="pref_omit_my_lines">Omit my lines</string>
+    <string name="pref_omit_my_lines_summ">Mute playback during your lines so you can recite them</string>
+    <string name="pref_line_feedback">Activate line accuracy feedback</string>
+    <string name="pref_line_feedback_summ">Provide feedback on your recited lines</string>
+    
+    <!-- Rehearsal screen elements -->
+    <string name="button_play">Play</string>
+    <string name="button_edit">Edit</string>
+    <string name="button_previous_scene">Previous Scene</string>
+    <string name="button_next_scene">Next Scene</string>
 
 </resources>
