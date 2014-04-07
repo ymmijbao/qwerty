@@ -18,7 +18,7 @@ import android.util.Log;
 /**
  * @author vinitnayak
  * Class that handles all persistent data storage for the application.
- * Uses JSON objects saved to text files in pulic external storage
+ * Uses JSON objects saved to text files in public external storage
  */
 public class DataStorage {
 
