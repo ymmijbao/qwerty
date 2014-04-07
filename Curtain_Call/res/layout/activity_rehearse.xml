@@ -56,7 +56,7 @@
 				    android:layout_marginRight="5dp"
 				    android:textSize="20sp"
 				    android:textStyle="bold"
-				    android:text="Hamlet:" />
+				    android:text="Prince:" />
 			    
 			    <TextView
 			        android:id="@+id/text_line1_line"
@@ -65,7 +65,7 @@
 				    android:layout_marginLeft="5dp"
 				    android:layout_marginRight="5dp"
 				    android:textSize="20sp"
-				    android:text="To be or not to be? That is the question. Blah blah blah. Where art thou, Romeo? Blah blah blah." />
+				    android:text="Come, Montague, for thou art early up / To see thy son and heir now early down." />
 			    
 			</TableRow>
 			
@@ -81,7 +81,7 @@
 				    android:layout_marginRight="5dp"
 				    android:textSize="20sp"
 				    android:textStyle="bold"
-				    android:text="Othello:" />
+				    android:text="Montague (You):" />
 			    
 			    <TextView
 				    android:id="@+id/text_line2_line"
@@ -90,7 +90,7 @@
 				    android:layout_marginLeft="5dp"
 				    android:layout_marginRight="5dp"
 				    android:textSize="20sp"
-				    android:text="I pledge allegiance to the flag of the United States of America." />
+				    android:text="_______________________" />
 			    
 			</TableRow>
 			
@@ -106,7 +106,7 @@
 				    android:layout_marginRight="5dp"
 				    android:textSize="20sp"
 				    android:textStyle="bold"
-				    android:text="Hamlet:" />
+				    android:text="Prince:" />
 	            
 	            <TextView
 				    android:id="@+id/text_line3_line"
@@ -115,7 +115,7 @@
 				    android:layout_marginLeft="5dp"
 				    android:layout_marginRight="5dp"
 				    android:textSize="20sp"
-				    android:text="You a stupid hoe, you a you a stupid hoe." />
+				    android:text="Look, and thou shalt see." />
 	            
 			</TableRow>
 			

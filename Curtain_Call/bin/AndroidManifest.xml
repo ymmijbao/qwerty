@@ -45,6 +45,12 @@
             android:name="com.qwerty.curtaincall.RehearseActivity"
             android:label="@string/title_activity_rehearse"
             android:parentActivityName="com.qwerty.curtaincall.ChunkSelector" >
+            
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.qwerty.curtaincall.RehearseSettingsActivity"
