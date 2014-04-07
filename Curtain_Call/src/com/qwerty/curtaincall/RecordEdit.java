@@ -1,15 +1,15 @@
 package com.qwerty.curtaincall;
 
-import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
-import android.support.v4.app.NavUtils;
 
 public class RecordEdit extends Activity {
 	
