@@ -142,6 +142,40 @@ public class DataStorage {
 		}
 		return playList;
 	}
+	
+	
+	/**
+	 * Returns a list of all chunks of the given playName.
+	 * 
+	 * @throws JSONException
+	 * @throws FileNotFoundException
+	 */
+	public static ArrayList<String> getAllChunks(String parent) throws JSONException,
+			FileNotFoundException {
+		ArrayList<String> chunkList = new ArrayList<String>();
+		String dir = getJsonDirectory();
+		dir += "/plays/play_" + parent + ".txt";
+		
+		File f = new File(dir);
+		if (f.exists()) {
+			Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+			.useDelimiter("\\Z");
+		
+			
+			JSONObject chunks = new JSONObject();
+			
+			// Check if file is empty
+			if (scanner.hasNext()) {
+				chunks = new JSONObject(scanner.next());
+				Iterator<String> i = chunks.keys();
+				
+				while (i.hasNext()) {
+					chunkList.add(i.next());
+				}
+			}
+		}
+		return chunkList;
+	}
 
 	/**
 	 * Gets the public directory for where all data is stored
