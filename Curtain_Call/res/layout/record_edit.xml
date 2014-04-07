@@ -13,7 +13,7 @@
     <ScrollView
         android:id="@+id/recordEditScrollView"
         android:layout_width="fill_parent"
-        android:layout_height="400dp" >
+        android:layout_height="720dp" >
 
         <LinearLayout
             android:id="@+id/recordEditLinearLayout"
