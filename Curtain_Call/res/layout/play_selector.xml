@@ -1,0 +1,47 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/playSelectorLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:background="#000000"
+    tools:context=".PlaySelector" >
+
+    <ImageView
+        android:id="@+id/curtain_call_image"
+        android:layout_width="750dp"
+        android:layout_height="220dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/home_screen" />
+
+    <Button
+        android:id="@+id/add_new_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/curtain_call_image"
+        android:layout_alignRight="@+id/curtain_call_image"
+        android:layout_below="@+id/curtain_call_image"
+        android:layout_marginTop="10dp"
+        android:background="#ffd700"
+		android:paddingRight="25dp"
+    	android:paddingLeft="25dp"
+        android:text="Add New Play" />
+    
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="fill_parent"
+       	android:layout_height="fill_parent"
+        android:layout_below="@+id/add_new_play" >
+
+        <LinearLayout
+            android:id="@+id/scrollViewLinLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

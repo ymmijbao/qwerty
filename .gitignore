@@ -1,2 +1,12 @@
+bin
+gen
 
 Curtain_Call/.settings/org.eclipse.jdt.core.prefs
+
+*.ap_
+
+*.ap_
+
+*.apk
+
+*.dex
