@@ -148,8 +148,9 @@ public class DataStorage {
 	 * @return
 	 * @throws JSONException 
 	 * @throws FileNotFoundException 
+	 * @throws UnsupportedEncodingException 
 	 */
-	public static int deletePlay(String parent) throws JSONException, FileNotFoundException {
+	public static int deletePlay(String parent) throws JSONException, FileNotFoundException, UnsupportedEncodingException {
 		String dir = getJsonDirectory();
 		dir += "/plays/play_" + parent + ".txt";
 		
@@ -189,6 +190,14 @@ public class DataStorage {
 			}
 		}
 		
+		// Now we need to delete entry from Play.txt
+		ArrayList<String> playList = new ArrayList<String>();
+		String fileDirPath = getJsonDirectory();
+		f = new File(fileDirPath+"/play.txt");
+		JSONObject jsonObject = new JSONObject();
+		
+		jsonObject.remove(parent);
+		writeToFile("Play", jsonObject.toString());
 		return 0;
 	}
 	
