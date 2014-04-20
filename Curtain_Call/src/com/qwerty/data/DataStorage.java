@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Scanner;
 
@@ -109,19 +110,23 @@ public class DataStorage {
 		return 0;
 	}
 
-	
 	/**
 	 * Adds a specific recording/line to the play and chunk specified.
-	 * @param parent of line to be added to
-	 * @param chunk of line to be added to
-	 * @param filePath of recorded audio file
-	 * @param actor me or them
+	 * 
+	 * @param play
+	 *            of line to be added to
+	 * @param chunk
+	 *            of line to be added to
+	 * @param filePath
+	 *            of recorded audio file
+	 * @param actor
+	 *            me or them
 	 */
-	public static int addLine(String parent, String chunk, String filePath,
+	public static int addLine(String play, String chunk, String filePath,
 			String actor) throws FileNotFoundException, JSONException,
 			UnsupportedEncodingException {
 		String dir = getJsonDirectory();
-		dir += "/plays/play_" + parent + ".txt";
+		dir += "/plays/play_" + play + ".txt";
 
 		File f = new File(dir);
 		if (!f.exists()) {
@@ -146,7 +151,7 @@ public class DataStorage {
 			specificChunk.put("lines", lineObject);
 			specificChunk.put("counter", counter);
 			chunks.put(chunk, specificChunk);
-			writeToFile("plays/play_" + parent, chunks.toString());
+			writeToFile("plays/play_" + play, chunks.toString());
 			return 0;
 		} else {
 			return -1;
@@ -192,10 +197,10 @@ public class DataStorage {
 	 * @throws FileNotFoundException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static int deletePlay(String parent) throws JSONException,
+	public static int deletePlay(String play) throws JSONException,
 			FileNotFoundException, UnsupportedEncodingException {
 		String dir = getJsonDirectory();
-		dir += "/plays/play_" + parent + ".txt";
+		dir += "/plays/play_" + play + ".txt";
 
 		File f = new File(dir);
 		if (!f.exists()) {
@@ -240,7 +245,7 @@ public class DataStorage {
 		f = new File(fileDirPath + "/play.txt");
 		JSONObject jsonObject = new JSONObject();
 
-		jsonObject.remove(parent);
+		jsonObject.remove(play);
 		writeToFile("Play", jsonObject.toString());
 		return 0;
 	}
@@ -249,11 +254,11 @@ public class DataStorage {
 	 * Deletes the chunk passed in as a paramter and all lines (audio files)
 	 * associated with it.
 	 */
-	public static int deleteChunk(String chunk, String parent)
+	public static int deleteChunk(String play, String chunk)
 			throws FileNotFoundException, JSONException,
 			UnsupportedEncodingException {
 		String dir = getJsonDirectory();
-		dir += "/plays/play_" + parent + ".txt";
+		dir += "/plays/play_" + play + ".txt";
 
 		File f = new File(dir);
 		if (!f.exists()) {
@@ -287,7 +292,7 @@ public class DataStorage {
 		}
 
 		chunks.remove(chunk);
-		writeToFile("plays/play_" + parent, chunks.toString());
+		writeToFile("plays/play_" + play, chunks.toString());
 		return 0;
 	}
 
@@ -297,11 +302,11 @@ public class DataStorage {
 	 * @throws JSONException
 	 * @throws FileNotFoundException
 	 */
-	public static ArrayList<String> getAllChunks(String parent)
+	public static ArrayList<String> getAllChunks(String play)
 			throws JSONException, FileNotFoundException {
 		ArrayList<String> chunkList = new ArrayList<String>();
 		String dir = getJsonDirectory();
-		dir += "/plays/play_" + parent + ".txt";
+		dir += "/plays/play_" + play + ".txt";
 
 		File f = new File(dir);
 		if (f.exists()) {
@@ -321,6 +326,47 @@ public class DataStorage {
 			}
 		}
 		return chunkList;
+	}
+
+	/**
+	 * Returns all the chunks in the form of a hashmap where they key is
+	 * either "me_#" or "them_#" where "#" is some number which can be ignored.
+	 * The value is the path to the audio file that was given when the line was added
+	 * @param play
+	 * @param chunk
+	 */
+	public static HashMap<String, String> getAllLines(String play,
+			String chunk) throws FileNotFoundException, JSONException {
+		String dir = getJsonDirectory();
+		dir += "/plays/play_" + play + ".txt";
+
+		File f = new File(dir);
+		if (!f.exists()) {
+			return null;
+		}
+
+		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+				.useDelimiter("\\Z");
+
+		JSONObject chunks = new JSONObject();
+
+		HashMap<String, String> linesMap = null;
+		if (scanner.hasNext()) {
+			linesMap = new HashMap<String, String>();
+
+			chunks = new JSONObject(scanner.next());
+			JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
+			JSONObject lineObject = ((JSONObject) chunks.get(chunk))
+					.getJSONObject("lines");
+
+			Iterator<String> i = lineObject.keys();
+			while (i.hasNext()) {
+				String actorName = i.next();
+				linesMap.put(actorName, lineObject.getString(actorName));
+			}
+		}
+
+		return linesMap;
 	}
 
 	/**
