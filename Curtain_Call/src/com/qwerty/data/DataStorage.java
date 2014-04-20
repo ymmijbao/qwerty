@@ -86,7 +86,7 @@ public class DataStorage {
 		if (!f.exists()) {
 			return -1;
 		}
-		Log.d("TAGGIN", f.getAbsolutePath());
+		
 		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
 				.useDelimiter("\\Z");
 
@@ -122,7 +122,7 @@ public class DataStorage {
 	 * @param filePath
 	 *            of recorded audio file
 	 * @param actor
-	 *            me or them
+	 *            Literally the string "me" or "them"
 	 */
 	public static int addLine(String play, String chunk, String filePath,
 			String actor) throws FileNotFoundException, JSONException,
@@ -185,9 +185,7 @@ public class DataStorage {
 				playList.add((String) i.next());
 			}
 		}
-		for (String s : playList) {
-			Log.d("TAGGIN", s);
-		}
+		
 		return playList;
 	}
 
@@ -215,7 +213,6 @@ public class DataStorage {
 		JSONObject chunks = new JSONObject();
 
 		if (scanner.hasNext()) {
-			Log.d("TAG", "FUCKTHIS");
 
 			chunks = new JSONObject(scanner.next());
 			Iterator<String> chunkList = chunks.keys();
