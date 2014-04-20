@@ -253,7 +253,7 @@ public class DataStorage {
 	}
 
 	/**
-	 * Deletes the chunk passed in as a paramter and all lines (audio files)
+	 * Deletes the chunk passed in as a parameter and all lines (audio files)
 	 * associated with it.
 	 */
 	public static int deleteChunk(String play, String chunk)
@@ -296,6 +296,80 @@ public class DataStorage {
 		chunks.remove(chunk);
 		writeToFile("plays/play_" + play, chunks.toString());
 		return 0;
+	}
+
+	/**
+	 * Delets a line from the given play and chunk, at the position the
+	 * user selected to delete. For example, if there are 4 lines total in 
+	 * the chunk and the user chooses to delete the first one, @param position
+	 * would be 0, regardless of whether it was truly the first recorded line or not.
+	 */
+	public static int deleteLine(String play, String chunk, int position)
+			throws FileNotFoundException, JSONException,
+			UnsupportedEncodingException {
+		// Input sanitization
+		if (position < 0) {
+			return -1;
+		}
+
+		String dir = getJsonDirectory();
+		dir += "/plays/play_" + play + ".txt";
+
+		File f = new File(dir);
+		if (!f.exists()) {
+			return -1;
+		}
+
+		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+				.useDelimiter("\\Z");
+
+		JSONObject chunks = new JSONObject();
+
+		if (scanner.hasNext()) {
+			chunks = new JSONObject(scanner.next());
+			JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
+			JSONObject lineObject = specificChunk.getJSONObject("lines");
+
+			PriorityQueue<Line> h = new PriorityQueue<Line>(10,
+					new LineComparator());
+			Iterator<String> i = lineObject.keys();
+			
+			// Populate priority queue
+			while (i.hasNext()) {
+				String s = i.next();
+				Line l = new Line(Integer.parseInt(s.split("_")[1]),
+						lineObject.getString(s), s.split("_")[0]);
+				h.add(l);
+			}
+
+			int currentLine = 0;
+			boolean positionFound = false;
+			
+			// Delete the item at index POSITION from priority queue
+			while (h.isEmpty() == false) {
+				Line l = h.poll();
+				String s = l.getmActor() + "_"
+						+ Integer.toString(l.getmPosition());
+				if (currentLine == position) {
+					lineObject.remove(s);
+					positionFound = true;
+					break;
+				}
+				currentLine++;
+			}
+			// Ensure file was deleted, otherwise bad input
+			if (positionFound == false) {
+				return -1;
+			}
+
+			specificChunk.put("lines", lineObject);
+			chunks.put(chunk, specificChunk);
+			writeToFile("plays/play_" + play, chunks.toString());
+			return 0;
+		} else {
+			return -1;
+		}
+
 	}
 
 	/**
@@ -405,7 +479,7 @@ public class DataStorage {
 	private static void writeToFile(String fileName, String content)
 			throws FileNotFoundException, UnsupportedEncodingException {
 		File file = new File(Environment.getExternalStoragePublicDirectory(
-				"/CurtainCall").getAbsolutePath());// +"/score.txt");
+				"/CurtainCall").getAbsolutePath());
 
 		PrintWriter writer = new PrintWriter(file.getAbsolutePath() + "/"
 				+ fileName + ".txt", "UTF-8");
