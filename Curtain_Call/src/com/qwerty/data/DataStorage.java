@@ -109,6 +109,51 @@ public class DataStorage {
 		return 0;
 	}
 
+	
+	/**
+	 * Adds a specific recording/line to the play and chunk specified.
+	 * @param parent of line to be added to
+	 * @param chunk of line to be added to
+	 * @param filePath of recorded audio file
+	 * @param actor me or them
+	 */
+	public static int addLine(String parent, String chunk, String filePath,
+			String actor) throws FileNotFoundException, JSONException,
+			UnsupportedEncodingException {
+		String dir = getJsonDirectory();
+		dir += "/plays/play_" + parent + ".txt";
+
+		File f = new File(dir);
+		if (!f.exists()) {
+			return -1;
+		}
+
+		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+				.useDelimiter("\\Z");
+
+		JSONObject chunks = new JSONObject();
+
+		if (scanner.hasNext()) {
+			chunks = new JSONObject(scanner.next());
+			JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
+			int counter = specificChunk.getInt("counter");
+			String actorKey = actor + "_" + counter;
+			counter++;
+
+			JSONObject lineObject = ((JSONObject) chunks.get(chunk))
+					.getJSONObject("lines");
+			lineObject.put(actorKey, filePath);
+			specificChunk.put("lines", lineObject);
+			specificChunk.put("counter", counter);
+			chunks.put(chunk, specificChunk);
+			writeToFile("plays/play_" + parent, chunks.toString());
+			return 0;
+		} else {
+			return -1;
+		}
+
+	}
+
 	/**
 	 * Returns a list of all plays the user has added.
 	 * 
