@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 
 import org.json.JSONException;
@@ -329,16 +331,18 @@ public class DataStorage {
 	}
 
 	/**
-	 * Returns all the chunks in the form of a hashmap where they key is
-	 * either "me_#" or "them_#" where "#" is some number which can be ignored.
-	 * The value is the path to the audio file that was given when the line was added
+	 * Returns all the chunks in the form of a hashmap where they key is either
+	 * "me_#" or "them_#" where "#" is some number which can be ignored. The
+	 * value is the path to the audio file that was given when the line was
+	 * added
+	 * 
 	 * @param play
 	 * @param chunk
 	 */
-	public static HashMap<String, String> getAllLines(String play,
+	public static LinkedHashMap<String, String> getAllLines(String parent,
 			String chunk) throws FileNotFoundException, JSONException {
 		String dir = getJsonDirectory();
-		dir += "/plays/play_" + play + ".txt";
+		dir += "/plays/play_" + parent + ".txt";
 
 		File f = new File(dir);
 		if (!f.exists()) {
@@ -349,10 +353,13 @@ public class DataStorage {
 				.useDelimiter("\\Z");
 
 		JSONObject chunks = new JSONObject();
+		Comparator<Line> c = new LineComparator();
+		PriorityQueue<Line> h = new PriorityQueue<Line>(10,
+				new LineComparator());
+		LinkedHashMap<String, String> linesMap = null;
 
-		HashMap<String, String> linesMap = null;
 		if (scanner.hasNext()) {
-			linesMap = new HashMap<String, String>();
+			linesMap = new LinkedHashMap<String, String>();
 
 			chunks = new JSONObject(scanner.next());
 			JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
@@ -361,11 +368,20 @@ public class DataStorage {
 
 			Iterator<String> i = lineObject.keys();
 			while (i.hasNext()) {
-				String actorName = i.next();
-				linesMap.put(actorName, lineObject.getString(actorName));
+				String s = i.next();
+				Line l = new Line(Integer.parseInt(s.split("_")[1]),
+						lineObject.getString(s), s.split("_")[0]);
+				h.add(l);
+			}
+			int counter = 0;
+			while (h.isEmpty() == false) {
+				Line l = h.poll();
+				String s = l.getmActor() + "_" + Integer.toString(counter);
+				linesMap.put(l.getmActor() + "_" + Integer.toString(counter),
+						lineObject.getString(s));
+				counter++;
 			}
 		}
-
 		return linesMap;
 	}
 
