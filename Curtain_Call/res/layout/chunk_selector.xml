@@ -1,16 +1,37 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chunkSelectorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#2eb4ed"
     tools:context=".ChunkSelector" >
-
-    <TextView
+        
+    <EditText
+        android:id="@+id/add_new_chunk"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:ems="10" 
+		android:textColorHint="#404040"
+		android:singleLine="true"
+        android:hint="Add New Chunk" >
+        <requestFocus />
+    </EditText>
+    
+    <ScrollView
+        android:id="@+id/chunkScrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/add_new_chunk"
+        android:layout_alignParentBottom="true" >
+
+        <LinearLayout
+            android:id="@+id/chunkScrollViewLinLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+        </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>

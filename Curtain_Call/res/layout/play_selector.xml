@@ -3,37 +3,29 @@
     android:id="@+id/playSelectorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2975aa"
+    android:background="#2eb4ed"
     tools:context=".PlaySelector" >
-
- <!--      
-    <Button
-        android:id="@+id/add_new_play"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="#ffd700"
-		android:paddingRight="25dp"
-    	android:paddingLeft="25dp"
-        android:text="Add New Play" />
--->
 
     <ImageView
         android:id="@+id/curtain_call_image"
-        android:layout_width="fill_parent"
-        android:layout_height="200dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:adjustViewBounds="true"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:scaleType="fitXY"
-        android:src="@drawable/curtain_call" />
+        android:src="@drawable/curtain_call_logo" />
 
     <EditText
         android:id="@+id/add_new_play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/scrollView"
+        android:layout_below="@+id/curtain_call_image"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:ems="10" 
@@ -46,7 +38,8 @@
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="fill_parent"
-        android:layout_height="280dp"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/add_new_play"
         android:layout_alignParentBottom="true" >
 
         <LinearLayout

@@ -3,12 +3,15 @@ package com.qwerty.curtaincall;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,9 +31,7 @@ public class PlaySelector extends Activity implements OnClickListener {
 	private EditText addNewPlay;
 	private Button newPlay;
 	View.OnTouchListener gestureListener;
-	
-	//    <!--  android:background="#2975aa"-->
-	
+		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -131,21 +132,11 @@ public class PlaySelector extends Activity implements OnClickListener {
 		//inflater.inflate(R.menu.play_selector, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
-	
-//	@Override
-//	public boolean onOptionsItemSelected(MenuItem item) {
-//	    switch (item.getItemId()) {
-//	        case R.id.add_new_play:
-//	            return true;
-//	        default:
-//	            return super.onOptionsItemSelected(item);
-//	    }
-//	}
-	
+		
 	public void addPlay(String playName) {
 		newPlay = new Button(PlaySelector.this);
-		//newPlay.setBackgroundColor(0xffacd1eb);
-		newPlay.setBackgroundColor(0xffe1c844);
+		newPlay.setBackgroundColor(0xff2975aa);
+		newPlay.setTextColor(0xffffffff);
 		newPlay.setText(playName);
 		newPlay.setTag(playName);
 		
@@ -153,9 +144,10 @@ public class PlaySelector extends Activity implements OnClickListener {
 		newPlay.setOnClickListener(new Button.OnClickListener() {
 
 			@Override
-			public void onClick(View v) {
-				System.out.println(v.getTag());
-				// Launch an intent to the go to next screen with v.getTag() as the key
+			public void onClick(View view) {
+				Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
+				intent.putExtra("play", (CharSequence) view.getTag());
+				startActivity(intent);
 			}
 		});
 		
