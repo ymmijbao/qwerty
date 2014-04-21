@@ -11,5 +11,6 @@
     <color name="red">#C80000</color>
     <color name="yellow">#FFFF00</color>
     <color name="cream">#FFFFCC</color>
+    <color name="light_blue">#87CEFA</color>
     
 </resources>

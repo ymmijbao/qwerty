@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="@color/white"
+    android:background="@color/light_blue"
     tools:context=".RehearseActivity" >
     
     <!-- Title of play and scene -->
@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:textSize="30sp"
+        android:textSize="15sp"
         android:text="Romeo and Juliet" />
     
     <TextView
@@ -24,15 +24,15 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/text_play_title"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="25dp"
-        android:textSize="45sp"
-        android:text="Act 5" />
+        android:layout_marginBottom="12dp"
+        android:textSize="22sp"
+        android:text="Act V" />
     
 	<!-- Scrollview displaying the scene's lines. -->
 	<ScrollView
 	    android:id="@+id/view_lines"
 	    android:layout_width="match_parent"
-	    android:layout_height="300dp"
+	    android:layout_height="200dp"
 	    android:layout_below="@id/text_scene_title"
 	    android:layout_centerHorizontal="true"
 	    android:padding="5dp"
@@ -55,11 +55,11 @@
     <ImageButton
         android:id="@+id/button_play"
         android:contentDescription="@string/button_play"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_below="@id/view_lines"
         android:layout_centerHorizontal="true"
-        android:layout_margin="60dp"
+        android:layout_margin="15dp"
         android:background="@drawable/play_button" />
     
     <!-- Skip to the previous scene in the script. -->
@@ -70,7 +70,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
         android:background="@drawable/button_rounded_corners"
-        android:textSize="30dp"
+        android:textSize="15dp"
         android:text="@string/button_previous_scene" />
     
     <!-- Skip to the next scene in the script. -->
@@ -81,7 +81,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:background="@drawable/button_rounded_corners"
-        android:textSize="30dp"
+        android:textSize="15dp"
         android:text="@string/button_next_scene" />
 	
 </RelativeLayout>
