@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -25,6 +26,7 @@ public class RecordEdit extends Activity {
 	String[] theirLines;
 	int myLineIndex;
 	int theirLineIndex;
+	int isRecording;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -101,9 +103,16 @@ public class RecordEdit extends Activity {
 		me.setOnTouchListener(new OnTouchListener() {
 			   @Override
 			   public boolean onTouch(View v, MotionEvent event) {
+				   if(isRecording==0){
+					   ImageButton rec = (ImageButton) findViewById(R.id.recordButton);
+					   rec.setEnabled(true);
+					   rec.setImageResource(R.drawable.record_button_red);
+				   }
+				   
 			       if(event.getAction() == MotionEvent.ACTION_DOWN) {
 			    	   System.out.println("me button pressed down");
-			    	   Toast.makeText(getApplicationContext(), "Recording your line...", Toast.LENGTH_SHORT).show();
+//			    	   Toast.makeText(getApplicationContext(), "Recording your line...", Toast.LENGTH_SHORT).show();
+			    	   
 			       } else if (event.getAction() == MotionEvent.ACTION_UP) {
 			    	   System.out.println("me button release");
 			    	   Toast.makeText(getApplicationContext(), "Line saved.", Toast.LENGTH_SHORT).show();
@@ -136,7 +145,7 @@ public class RecordEdit extends Activity {
 			    	   System.out.println("them button release");
 			    	   Toast.makeText(getApplicationContext(), "Line saved.", Toast.LENGTH_SHORT).show();
 			    	   final Button newLine = new Button(RecordEdit.this);
-			    	   newLine.setBackgroundColor(0xfffaebd7);
+			    	   newLine.setBackgroundColor(0xfff8b294);
 			    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 			    	   layoutParams.setMargins(0, 10, 0, 0);
 			    	   String value = "Gregory: " + theirLines[theirLineIndex%6];

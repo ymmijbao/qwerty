@@ -13,7 +13,8 @@
     <ScrollView
         android:id="@+id/recordEditScrollView"
         android:layout_width="fill_parent"
-        android:layout_height="250dp" >
+        android:layout_height="300dp"
+        android:layout_marginBottom="10dp" >
 
         <LinearLayout
             android:id="@+id/recordEditLinearLayout"
@@ -32,7 +33,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
-        android:background="#e1c844"
+        android:background="#faebd7"
         android:text="My line" />
 
     <Button
@@ -43,7 +44,7 @@
         android:layout_alignBottom="@+id/meButton"
         android:layout_alignRight="@+id/recordEditScrollView"
         android:layout_marginRight="10dp"
-        android:background="#F27038"
+        android:background="#f8b294"
         android:text="Other line" />
     
     <ImageButton
@@ -55,6 +56,8 @@
         android:layout_below="@id/recordEditScrollView"
         android:layout_centerHorizontal="true"
         android:adjustViewBounds="true"
-        android:src="@drawable/record_button_gray"/>
+        android:src="@drawable/record_button_gray"
+        android:enabled="false"
+        android:background="@null"/>
 
 </RelativeLayout>
