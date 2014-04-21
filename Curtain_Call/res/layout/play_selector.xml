@@ -3,38 +3,51 @@
     android:id="@+id/playSelectorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:background="#000000"
+    android:background="#2975aa"
     tools:context=".PlaySelector" >
 
-    <ImageView
-        android:id="@+id/curtain_call_image"
-        android:layout_width="750dp"
-        android:layout_height="220dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:adjustViewBounds="true"
-        android:scaleType="fitXY"
-        android:src="@drawable/home_screen" />
-
+ <!--      
     <Button
         android:id="@+id/add_new_play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/curtain_call_image"
-        android:layout_alignRight="@+id/curtain_call_image"
-        android:layout_below="@+id/curtain_call_image"
         android:layout_marginTop="10dp"
         android:background="#ffd700"
 		android:paddingRight="25dp"
     	android:paddingLeft="25dp"
         android:text="Add New Play" />
+-->
+
+    <ImageView
+        android:id="@+id/curtain_call_image"
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/curtain_call" />
+
+    <EditText
+        android:id="@+id/add_new_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/scrollView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:ems="10" 
+		android:textColorHint="#404040"
+		android:singleLine="true"
+        android:hint="Add New Play" >
+        <requestFocus />
+    </EditText>
     
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="fill_parent"
-       	android:layout_height="fill_parent"
-        android:layout_below="@+id/add_new_play" >
+        android:layout_height="280dp"
+        android:layout_alignParentBottom="true" >
 
         <LinearLayout
             android:id="@+id/scrollViewLinLayout"
