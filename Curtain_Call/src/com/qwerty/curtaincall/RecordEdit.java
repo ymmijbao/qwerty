@@ -4,14 +4,16 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
+import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class RecordEdit extends Activity {
@@ -21,10 +23,13 @@ public class RecordEdit extends Activity {
 	
 	Button me;
 	Button them;
+	ImageButton rec;
 	String[] myLines;
 	String[] theirLines;
 	int myLineIndex;
 	int theirLineIndex;
+	int isRecording;
+	int recButtonEnabled;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,7 @@ public class RecordEdit extends Activity {
 		// Set up the listeners
 		addListenerOnMeButton();
 		addListenerOnThemButton();
+		addListenerOnRecordButton();
 		
 		// instantiate stub lines
 		myLines = new String[6]; // Sampson
@@ -94,29 +100,54 @@ public class RecordEdit extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
+	public void addListenerOnRecordButton() {
+		rec = (ImageButton) findViewById(R.id.recordButton);
+		recButtonEnabled=0;
+		
+		rec.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (recButtonEnabled == 0){
+					Toast toast = Toast.makeText(getApplicationContext(), "Select 'My Line' or 'Other Line' to record", 2700);
+					toast.setGravity(Gravity.CENTER, 0, 0);
+					TextView viewtext = (TextView) toast.getView().findViewById(android.R.id.message);
+					if( viewtext!=null) viewtext.setGravity(Gravity.CENTER);
+					toast.show();
+				} else {
+					if(isRecording == 0){
+						isRecording = 1;
+		//					startRecording();
+						rec.setImageResource(R.drawable.stop_button);
+					} else if (isRecording ==1){
+						isRecording = 0;
+		//					stopRecording();
+						rec.setImageResource(R.drawable.record_button_gray);
+						recButtonEnabled = 0;
+					}
+				}
+			}
+		});
+	}
+	
 	public void addListenerOnMeButton() {
 		
 		me = (Button) findViewById(R.id.meButton);
 
-		me.setOnTouchListener(new OnTouchListener() {
-			   @Override
-			   public boolean onTouch(View v, MotionEvent event) {
-			       if(event.getAction() == MotionEvent.ACTION_DOWN) {
-			    	   System.out.println("me button pressed down");
-			    	   Toast.makeText(getApplicationContext(), "Recording your line...", Toast.LENGTH_SHORT).show();
-			       } else if (event.getAction() == MotionEvent.ACTION_UP) {
-			    	   System.out.println("me button release");
-			    	   Toast.makeText(getApplicationContext(), "Line saved.", Toast.LENGTH_SHORT).show();
-			    	   final Button newLine = new Button(RecordEdit.this);
-			    	   newLine.setBackgroundColor(0xfffaebd7);
-			    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-			    	   layoutParams.setMargins(0, 10, 0, 0);
-			    	   String value = "Sampson: " + myLines[myLineIndex%6];
-			    	   myLineIndex++;
-			           newLine.setText(value);
-			           scrollLinLayout.addView(newLine, layoutParams);
-			       }
-			       return true;
+		me.setOnClickListener(new OnClickListener() {
+			   public void onClick(View v) {
+		    	   if(isRecording==0){
+					   recButtonEnabled = 1;
+					   rec.setImageResource(R.drawable.record_button_red);
+				   }
+		    	   System.out.println("me button release");
+		    	   final Button newLine = new Button(RecordEdit.this);
+		    	   newLine.setBackgroundColor(0xfffaebd7);
+		    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+		    	   layoutParams.setMargins(0, 10, 0, 0);
+		    	   String value = "Sampson: " + myLines[myLineIndex%6];
+		    	   myLineIndex++;
+		           newLine.setText(value);
+		           scrollLinLayout.addView(newLine, layoutParams);
 			   }
 		});
 
@@ -126,25 +157,22 @@ public class RecordEdit extends Activity {
 		
 		them = (Button) findViewById(R.id.themButton);
 
-		them.setOnTouchListener(new OnTouchListener() {
+		them.setOnClickListener(new OnClickListener() {
 			   @Override
-			   public boolean onTouch(View v, MotionEvent event) {
-			       if(event.getAction() == MotionEvent.ACTION_DOWN) {
-			    	   System.out.println("them button pressed down");
-			    	   Toast.makeText(getApplicationContext(), "Recording their line...", Toast.LENGTH_SHORT).show();
-			       } else if (event.getAction() == MotionEvent.ACTION_UP) {
-			    	   System.out.println("them button release");
-			    	   Toast.makeText(getApplicationContext(), "Line saved.", Toast.LENGTH_SHORT).show();
-			    	   final Button newLine = new Button(RecordEdit.this);
-			    	   newLine.setBackgroundColor(0xfffaebd7);
-			    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-			    	   layoutParams.setMargins(0, 10, 0, 0);
-			    	   String value = "Gregory: " + theirLines[theirLineIndex%6];
-			    	   theirLineIndex++;
-			    	   newLine.setText(value);
-			    	   scrollLinLayout.addView(newLine, layoutParams);
-			       }
-			       return true;
+			   public void onClick(View v) {
+				   if(isRecording==0){
+					   recButtonEnabled = 1;
+					   rec.setImageResource(R.drawable.record_button_red);
+				   }
+		    	   final Button newLine = new Button(RecordEdit.this);
+		    	   newLine.setBackgroundColor(0xfff8b294);
+		    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+		    	   layoutParams.setMargins(0, 10, 0, 0);
+		    	   String value = "Gregory: " + theirLines[theirLineIndex%6];
+		    	   theirLineIndex++;
+		    	   newLine.setText(value);
+		    	   scrollLinLayout.addView(newLine, layoutParams);
+			     
 			   }
 		});
 
