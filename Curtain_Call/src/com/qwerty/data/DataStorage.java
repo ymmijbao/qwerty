@@ -356,9 +356,7 @@ public class DataStorage {
 	 * Deletes the chunk passed in as a parameter and all lines (audio files)
 	 * associated with it.
 	 */
-	public static int deleteChunk(String play, String chunk)
-			throws FileNotFoundException, JSONException,
-			UnsupportedEncodingException {
+	public static int deleteChunk(String play, String chunk) {
 		String dir = getJsonDirectory();
 		dir += "/plays/play_" + play + ".txt";
 
@@ -367,34 +365,54 @@ public class DataStorage {
 			return -1;
 		}
 
-		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
-				.useDelimiter("\\Z");
+		Scanner scanner;
+		try {
+			scanner = new Scanner(new File(f.getAbsolutePath()))
+					.useDelimiter("\\Z");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		}
 
 		JSONObject chunks = new JSONObject();
 
 		if (scanner.hasNext()) {
-			chunks = new JSONObject(scanner.next());
-
-			if (chunks.has(chunk) == false) {
-				return -1;
+			try {
+				chunks = new JSONObject(scanner.next());
+				
+				if (chunks.has(chunk) == false) {
+					return -1;
+				}
+				
+				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
+				
+				Iterator<String> lineIterator = ((JSONObject) specificChunk
+						.get("lines")).keys();
+				while (lineIterator.hasNext()) {
+					String audioFilePath = lineIterator.next();
+					// Add code here to remove file
+				}
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
-			JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
-
-			Iterator<String> lineIterator = ((JSONObject) specificChunk
-					.get("lines")).keys();
-
-			while (lineIterator.hasNext()) {
-				String audioFilePath = lineIterator.next();
-				// Add code here to remove file
-			}
 
 		} else {
 			return -1;
 		}
 
 		chunks.remove(chunk);
-		writeToFile("plays/play_" + play, chunks.toString());
+		try {
+			writeToFile("plays/play_" + play, chunks.toString());
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		}
 		return 0;
 	}
 
@@ -404,9 +422,7 @@ public class DataStorage {
 	 * the chunk and the user chooses to delete the first one, @param position
 	 * would be 0, regardless of whether it was truly the first recorded line or not.
 	 */
-	public static int deleteLine(String play, String chunk, int position)
-			throws FileNotFoundException, JSONException,
-			UnsupportedEncodingException {
+	public static int deleteLine(String play, String chunk, int position) {
 		// Input sanitization
 		if (position < 0) {
 			return -1;
@@ -420,51 +436,69 @@ public class DataStorage {
 			return -1;
 		}
 
-		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
-				.useDelimiter("\\Z");
+		Scanner scanner;
+		try {
+			scanner = new Scanner(new File(f.getAbsolutePath()))
+					.useDelimiter("\\Z");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		}
 
 		JSONObject chunks = new JSONObject();
 
 		if (scanner.hasNext()) {
-			chunks = new JSONObject(scanner.next());
-			JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
-			JSONObject lineObject = specificChunk.getJSONObject("lines");
-
-			PriorityQueue<Line> h = new PriorityQueue<Line>(10,
-					new LineComparator());
-			Iterator<String> i = lineObject.keys();
-			
-			// Populate priority queue
-			while (i.hasNext()) {
-				String s = i.next();
-				Line l = new Line(Integer.parseInt(s.split("_")[1]),
-						lineObject.getString(s), s.split("_")[0]);
-				h.add(l);
-			}
-
-			int currentLine = 0;
-			boolean positionFound = false;
-			
-			// Delete the item at index POSITION from priority queue
-			while (h.isEmpty() == false) {
-				Line l = h.poll();
-				String s = l.getmActor() + "_"
-						+ Integer.toString(l.getmPosition());
-				if (currentLine == position) {
-					lineObject.remove(s);
-					positionFound = true;
-					break;
+			try {
+				chunks = new JSONObject(scanner.next());
+				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
+				JSONObject lineObject = specificChunk.getJSONObject("lines");
+				
+				PriorityQueue<Line> h = new PriorityQueue<Line>(10,
+						new LineComparator());
+				Iterator<String> i = lineObject.keys();
+				// Populate priority queue
+				while (i.hasNext()) {
+					String s = i.next();
+					Line l = new Line(Integer.parseInt(s.split("_")[1]),
+							lineObject.getString(s), s.split("_")[0]);
+					h.add(l);
 				}
-				currentLine++;
+				
+				
+				
+				int currentLine = 0;
+				boolean positionFound = false;
+				
+				// Delete the item at index POSITION from priority queue
+				while (h.isEmpty() == false) {
+					Line l = h.poll();
+					String s = l.getmActor() + "_"
+							+ Integer.toString(l.getmPosition());
+					if (currentLine == position) {
+						lineObject.remove(s);
+						positionFound = true;
+						break;
+					}
+					currentLine++;
+				}
+				// Ensure file was deleted, otherwise bad input
+				if (positionFound == false) {
+					return -1;
+				}
+				
+				specificChunk.put("lines", lineObject);
+				chunks.put(chunk, specificChunk);
+				writeToFile("plays/play_" + play, chunks.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return EXCEPTION;
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return EXCEPTION;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				return EXCEPTION;
 			}
-			// Ensure file was deleted, otherwise bad input
-			if (positionFound == false) {
-				return -1;
-			}
-
-			specificChunk.put("lines", lineObject);
-			chunks.put(chunk, specificChunk);
-			writeToFile("plays/play_" + play, chunks.toString());
 			return 0;
 		} else {
 			return -1;
