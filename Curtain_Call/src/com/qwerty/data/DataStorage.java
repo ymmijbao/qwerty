@@ -314,26 +314,38 @@ public class DataStorage {
 
 			}
 			scanner.close();
-			boolean deleteSuccess = f.delete();
 
-			if (!deleteSuccess) {
-				return -1;
-			}
 		}
+		
+		boolean deleteSuccess = f.delete();
+
+		if (!deleteSuccess) {
+			return -1;
+		}
+		
+		
 
 		// Now we need to delete entry from Play.txt
 		ArrayList<String> playList = new ArrayList<String>();
 		String fileDirPath = getJsonDirectory();
 		f = new File(fileDirPath + "/play.txt");
-		JSONObject jsonObject = new JSONObject();
-
-		jsonObject.remove(play);
+		JSONObject jsonObject;
+		
 		try {
-			writeToFile("Play", jsonObject.toString());
+			scanner = new Scanner(new File(f.getAbsolutePath()))
+			.useDelimiter("\\Z");
+			if (scanner.hasNext()) {
+				jsonObject = new JSONObject(scanner.next());
+				jsonObject.remove(play);
+				writeToFile("Play", jsonObject.toString());
+			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return EXCEPTION;
 		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		} catch (JSONException e) {
 			e.printStackTrace();
 			return EXCEPTION;
 		}
@@ -492,7 +504,7 @@ public class DataStorage {
 					e.printStackTrace();
 					return null;
 				}
-				Iterator<String> i = (Iterator<String>) chunks.keys();
+				Iterator<String> i = chunks.keys();
 
 				while (i.hasNext()) {
 					chunkList.add(i.next());

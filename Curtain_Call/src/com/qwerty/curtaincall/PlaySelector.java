@@ -182,6 +182,7 @@ public class PlaySelector extends Activity implements OnClickListener {
     	                      @Override
     	                        public void run() {
     	                    	  	if (viewTouched != null) {
+    	                    	  		DataStorage.deletePlay((String) viewTouched.getTag());
     	                    	  		layout.removeView(viewTouched);
     	                    	  		viewTouched = null;
     	                    	  	}
