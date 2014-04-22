@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -141,7 +142,13 @@ public class RecordEdit extends Activity {
 	   layoutParams.setMargins(0, 10, 0, 0);
 	   newLine.setText(value);
        scrollLinLayout.addView(newLine, layoutParams);
-       
+	  	final ScrollView scroll = (ScrollView) findViewById(R.id.recordEditScrollView);
+    	scroll.post(new Runnable() {            
+    		@Override
+		    public void run() {
+    			scroll.fullScroll(View.FOCUS_DOWN);              
+		    }
+		});
        	// DEBUG
         /*
    		LinkedHashMap<String, String> lines = DataStorage.getAllLines(playName, chunkName);
