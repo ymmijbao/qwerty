@@ -180,7 +180,25 @@ public class RehearseActivity extends Activity {
 		
 		// Start the MediaPlayer.
 		Log.d("REHEARSEACTIVITY", "Attempting to start the MediaPlayer...");
-		mediaPlayer.start();
+		mediaPlayer = new MediaPlayer();
+		Log.d("REHEARSEACTIVITY", "Data source: " + currentLineTR.getLineAudio());
+		try {
+			mediaPlayer.setDataSource(currentLineTR.getLineAudio());
+			mediaPlayer.prepare();
+			mediaPlayer.start();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void pauseAudio() {
