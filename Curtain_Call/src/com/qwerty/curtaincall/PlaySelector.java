@@ -1,11 +1,6 @@
 package com.qwerty.curtaincall;
 
-import java.io.IOException;
 import java.util.ArrayList;
-
-import org.json.JSONException;
-
-import com.qwerty.data.DataStorage;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,8 +12,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,6 +22,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import com.qwerty.data.DataStorage;
 
 public class PlaySelector extends Activity implements OnClickListener {
 	private RelativeLayout mainLayout;
@@ -108,15 +103,15 @@ public class PlaySelector extends Activity implements OnClickListener {
 		newPlay.setTag(playName);
 		
 		/** To go to the next corresponding screen to add/edit recordings **/
-		newPlay.setOnClickListener(new Button.OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
-				intent.putExtra("play", (CharSequence) view.getTag());
-				startActivity(intent);
-			}
-		});
+//		newPlay.setOnClickListener(new Button.OnClickListener() {
+//
+//			@Override
+//			public void onClick(View view) {
+//				Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
+//				intent.putExtra("play", (CharSequence) view.getTag());
+//				startActivity(intent);
+//			}
+//		});
 		
 		/** To rename the play name once it has been created **/
 		newPlay.setOnLongClickListener(new Button.OnLongClickListener() {
@@ -158,12 +153,13 @@ public class PlaySelector extends Activity implements OnClickListener {
 	}
 	
 	public class MyGestureDetector extends SimpleOnGestureListener {
-		private static final int SWIPE_MIN_DIST = 120;
+		private static final int SWIPE_MIN_DIST = 100;
 		private static final int SWIPE_MAX_OFF_PATH = 250;
-		private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+		private static final int SWIPE_THRESHOLD_VELOCITY = 180;
+		
 		@Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            try {
+            try {            	
                 if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) return false;
 
                 if (e2.getX() - e1.getX() > SWIPE_MIN_DIST && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
@@ -182,6 +178,7 @@ public class PlaySelector extends Activity implements OnClickListener {
     	                      @Override
     	                        public void run() {
     	                    	  	if (viewTouched != null) {
+    	                    	  		DataStorage.deletePlay((String) viewTouched.getTag());
     	                    	  		layout.removeView(viewTouched);
     	                    	  		viewTouched = null;
     	                    	  	}
@@ -198,7 +195,7 @@ public class PlaySelector extends Activity implements OnClickListener {
     			    });
     			    
     			    alert.show();    	
-                }
+                } 
             } catch (Exception e) {
                 // Do nothing
             }
@@ -208,6 +205,14 @@ public class PlaySelector extends Activity implements OnClickListener {
 
         @Override
         public boolean onDown(MotionEvent e) {
+        	return true;
+        }
+        
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+			Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
+			intent.putExtra("play", (CharSequence) viewTouched.getTag());
+			startActivity(intent);
         	return true;
         }
     }

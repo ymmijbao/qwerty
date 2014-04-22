@@ -1,26 +1,16 @@
 package com.qwerty.curtaincall;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
-import com.qwerty.curtaincall.RehearseSettingsActivity.MyPreferenceFragment;
-
-import android.media.AudioFormat;
-import android.media.AudioManager;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.app.Activity;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.graphics.Typeface;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +19,6 @@ import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /* TODO: 
  * Implement button actions
