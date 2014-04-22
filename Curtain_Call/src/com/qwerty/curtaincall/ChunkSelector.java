@@ -1,5 +1,9 @@
 package com.qwerty.curtaincall;
 
+import java.util.ArrayList;
+
+import com.qwerty.data.DataStorage;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -10,8 +14,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,7 +23,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class ChunkSelector extends Activity implements OnClickListener {
@@ -33,6 +34,10 @@ public class ChunkSelector extends Activity implements OnClickListener {
 	private Button newPlay;
 	private String playNameStr;
 	View.OnTouchListener gestureListener;
+	
+	public static final int FROM_INPUT = 1;
+	public static final int FROM_STORAGE = 2;
+	private int buttonCounter = 0;
 		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,25 +67,32 @@ public class ChunkSelector extends Activity implements OnClickListener {
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-					String playName = addNewChunk.getText().toString();
+					String playName = addNewChunk.getText().toString().trim();
 					
 					if (playName.equals("")) {
 						Toast.makeText(getApplicationContext(), "Please enter a chunk title first", Toast.LENGTH_SHORT).show();
 					} else {
-						addPlay(addNewChunk.getText().toString());
-						addNewChunk.setText("");
+						addChunk(addNewChunk.getText().toString(), ChunkSelector.FROM_INPUT);
 					}
 				}
 				
 				return false;
 			}
         });
+        
+		ArrayList<String> chunksList = DataStorage.getAllChunks(playNameStr);
+		
+		for (String chunk : chunksList) {
+			addChunk(chunk, ChunkSelector.FROM_STORAGE);
+		}
+        
 	}
 	
 	public class MyGestureDetector extends SimpleOnGestureListener {
 		private static final int SWIPE_MIN_DIST = 120;
 		private static final int SWIPE_MAX_OFF_PATH = 250;
 		private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+		
 		@Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             try {
@@ -89,11 +101,11 @@ public class ChunkSelector extends Activity implements OnClickListener {
                 if (e2.getX() - e1.getX() > SWIPE_MIN_DIST && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 	/** Adding a Alert Dialog to ask the user if he/she really wants to delete the play **/
     			    AlertDialog.Builder alert = new AlertDialog.Builder(ChunkSelector.this);
-    			    alert.setMessage("Permanently delete play?");
+    			    alert.setMessage("Permanently delete chunk?");
     			    
     			    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
     			    	public void onClick(DialogInterface dialog, int whichButton) {
-    	                	final LinearLayout layout = (LinearLayout) findViewById(R.id.scrollViewLinLayout);
+    	                	final LinearLayout layout = (LinearLayout) findViewById(R.id.chunkScrollViewLinLayout);
     	                	final Animation animation = AnimationUtils.loadAnimation(ChunkSelector.this, android.R.anim.slide_out_right); 
     	                    viewTouched.startAnimation(animation);
     	                    Handler handle = new Handler();
@@ -102,6 +114,7 @@ public class ChunkSelector extends Activity implements OnClickListener {
     	                      @Override
     	                        public void run() {
     	                    	  	if (viewTouched != null) {
+    	                    	  		DataStorage.deleteChunk(playNameStr, (String) viewTouched.getTag());
     	                    	  		layout.removeView(viewTouched);
     	                    	  		viewTouched = null;
     	                    	  	}
@@ -138,8 +151,25 @@ public class ChunkSelector extends Activity implements OnClickListener {
 		//inflater.inflate(R.menu.play_selector, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
+	
+	public void addChunk(String chunkName, int source) {		
+		if (chunkName.equals("")) {
+			Toast.makeText(getApplicationContext(), "Please enter a play title first", Toast.LENGTH_SHORT).show();
+		} else {
+			int returnValue = DataStorage.addChunk(chunkName, playNameStr, 0); // counter right now
+			
+			if ((returnValue == DataStorage.EXISTS) && (source == PlaySelector.FROM_INPUT)) {
+				Toast.makeText(getApplicationContext(), "The play already exists.", Toast.LENGTH_SHORT).show();
+			} else if (source == PlaySelector.FROM_INPUT) {
+				addChunkView(addNewChunk.getText().toString());
+				addNewChunk.setText("");
+			} else if (source == PlaySelector.FROM_STORAGE) {
+				addChunkView(chunkName);
+			}
+		}
+	}
 		
-	public void addPlay(String playName) {
+	public void addChunkView(String playName) {
 		newPlay = new Button(ChunkSelector.this);
 		newPlay.setBackgroundColor(0xff2975aa);
 		newPlay.setTextColor(0xffffffff);

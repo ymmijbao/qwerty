@@ -1,11 +1,6 @@
 package com.qwerty.curtaincall;
 
-import java.io.IOException;
 import java.util.ArrayList;
-
-import org.json.JSONException;
-
-import com.qwerty.data.DataStorage;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,8 +12,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,6 +22,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import com.qwerty.data.DataStorage;
 
 public class PlaySelector extends Activity implements OnClickListener {
 	private RelativeLayout mainLayout;
@@ -160,7 +155,7 @@ public class PlaySelector extends Activity implements OnClickListener {
 	public class MyGestureDetector extends SimpleOnGestureListener {
 		private static final int SWIPE_MIN_DIST = 120;
 		private static final int SWIPE_MAX_OFF_PATH = 250;
-		private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+		private static final int SWIPE_THRESHOLD_VELOCITY = 100;
 		@Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             try {

@@ -16,7 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Environment;
-import android.util.Log;
 
 /**
  * @author vinitnayak Class that handles all persistent data storage for the
