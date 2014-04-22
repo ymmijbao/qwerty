@@ -30,6 +30,10 @@ public class RecordEdit extends Activity {
 	int theirLineIndex;
 	int isRecording;
 	int recButtonEnabled;
+	int meDepressed=0xffebae5d;
+	int meUnpressed=0xfffaebd7;
+	int themDepressed=0xffe04e0f;
+	int themUnpressed=0xfff8b294;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +127,8 @@ public class RecordEdit extends Activity {
 		//					stopRecording();
 						rec.setImageResource(R.drawable.record_button_gray);
 						recButtonEnabled = 0;
+						me.setBackgroundColor(meUnpressed);
+						them.setBackgroundColor(themUnpressed);
 					}
 				}
 			}
@@ -135,6 +141,9 @@ public class RecordEdit extends Activity {
 
 		me.setOnClickListener(new OnClickListener() {
 			   public void onClick(View v) {
+//				   me.setBackgroundColor(meDepressed);
+				   them.setBackgroundColor(themUnpressed);
+				   me.setBackgroundResource(R.drawable.me_button_highlighted);
 		    	   if(isRecording==0){
 					   recButtonEnabled = 1;
 					   rec.setImageResource(R.drawable.record_button_red);
@@ -160,6 +169,8 @@ public class RecordEdit extends Activity {
 		them.setOnClickListener(new OnClickListener() {
 			   @Override
 			   public void onClick(View v) {
+				   me.setBackgroundColor(meUnpressed);
+				   them.setBackgroundResource(R.drawable.them_button_highlighted);
 				   if(isRecording==0){
 					   recButtonEnabled = 1;
 					   rec.setImageResource(R.drawable.record_button_red);
