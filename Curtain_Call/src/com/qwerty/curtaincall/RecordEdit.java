@@ -1,8 +1,17 @@
 package com.qwerty.curtaincall;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.support.v4.app.NavUtils;
 import android.view.Gravity;
 import android.view.Menu;
@@ -13,10 +22,11 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class RecordEdit extends Activity {
+public class RecordEdit extends Activity implements RecognitionListener {
 	
 	private RelativeLayout mainLayout;
 	private LinearLayout scrollLinLayout;
@@ -24,16 +34,25 @@ public class RecordEdit extends Activity {
 	Button me;
 	Button them;
 	ImageButton rec;
-	String[] myLines;
-	String[] theirLines;
-	int myLineIndex;
-	int theirLineIndex;
+
 	int isRecording;
 	int recButtonEnabled;
 	int meDepressed=0xffebae5d;
 	int meUnpressed=0xfffaebd7;
 	int themDepressed=0xffe04e0f;
 	int themUnpressed=0xfff8b294;
+	
+	boolean isMePressed = false;
+	boolean isThemPressed = false;
+	
+	private SpeechRecognizer mSpeechRecognizer;
+	private ImageButton mListenButton;
+	private TextView mResultText;
+	private MediaRecorder myAudioRecorder;
+	private String outputFile = null;
+	//private Button start,stop,play;
+	
+	int linesRecorded = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,23 +71,35 @@ public class RecordEdit extends Activity {
 		// Set up the listeners
 		addListenerOnMeButton();
 		addListenerOnThemButton();
-		addListenerOnRecordButton();
+		//addListenerOnRecordButton();
 		
-		// instantiate stub lines
-		myLines = new String[6]; // Sampson
-		theirLines = new String[6]; // Gregory
-		myLines[0] = "Gregory, o' my word, we'll not carry coals.";
-		theirLines[0] = "No, for then we should be colliers.";
-		myLines[1] = "I mean, an we be in choler, we'll draw.";
-		theirLines[1] = "Ay, while you live, draw your neck out o' the collar.";
-		myLines[2] = "I strike quickly, being moved.";
-		theirLines[2] = "But thou art not quickly moved to strike.";
-		myLines[3] = "A dog of the house of Montague moves me.";
-		theirLines[3] = "To move is to stir; and to be valiant is to stand: therefore, if thou art moved, thou runn'st away.";
-		myLines[4] = "A dog of that house shall move me to stand: I will take the wall of any man or maid of Montague's.";
-		theirLines[4] = "That shows thee a weak slave; for the weakest goes to the wall.";
-		myLines[5] = "True; and therefore women, being the weaker vessels, are ever thrust to the wall: therefore I will push Montague's men from the wall, and thrust his maids to the wall.";
-		theirLines[5] = "The quarrel is between our masters and us their men.";
+		
+		// sound part
+	    outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/myrecording.3gp";;
+		
+	    myAudioRecorder = new MediaRecorder();
+	    myAudioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+	    myAudioRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+	    myAudioRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+	    myAudioRecorder.setOutputFile(outputFile);
+
+		mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+		mSpeechRecognizer.setRecognitionListener(this);
+		mListenButton = (ImageButton)findViewById(R.id.recordButton);
+		//mResultText = (TextView)findViewById(R.id.resultText);
+
+//		mListenButton.setOnClickListener(new View.OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//				Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+//				i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,  RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+//				i.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak!");
+//				i.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "com.qwerty.curtaincall");
+//				mSpeechRecognizer.startListening(i);
+//
+//			}
+//		});	
 	}
 
 	/**
@@ -104,36 +135,36 @@ public class RecordEdit extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
-	public void addListenerOnRecordButton() {
-		rec = (ImageButton) findViewById(R.id.recordButton);
-		recButtonEnabled=0;
-		
-		rec.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (recButtonEnabled == 0){
-					Toast toast = Toast.makeText(getApplicationContext(), "Select 'My Line' or 'Other Line' to record", 2700);
-					toast.setGravity(Gravity.CENTER, 0, 0);
-					TextView viewtext = (TextView) toast.getView().findViewById(android.R.id.message);
-					if( viewtext!=null) viewtext.setGravity(Gravity.CENTER);
-					toast.show();
-				} else {
-					if(isRecording == 0){
-						isRecording = 1;
-		//					startRecording();
-						rec.setImageResource(R.drawable.stop_button);
-					} else if (isRecording ==1){
-						isRecording = 0;
-		//					stopRecording();
-						rec.setImageResource(R.drawable.record_button_gray);
-						recButtonEnabled = 0;
-						me.setBackgroundColor(meUnpressed);
-						them.setBackgroundColor(themUnpressed);
-					}
-				}
-			}
-		});
-	}
+//	public void addListenerOnRecordButton() {
+//		rec = (ImageButton) findViewById(R.id.recordButton);
+//		recButtonEnabled=0;
+//		
+//		rec.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				if (recButtonEnabled == 0){
+//					Toast toast = Toast.makeText(getApplicationContext(), "Select 'My Line' or 'Other Line' to record", 2700);
+//					toast.setGravity(Gravity.CENTER, 0, 0);
+//					TextView viewtext = (TextView) toast.getView().findViewById(android.R.id.message);
+//					if( viewtext!=null) viewtext.setGravity(Gravity.CENTER);
+//					toast.show();
+//				} else {
+//					if(isRecording == 0){
+//						isRecording = 1;
+//		//					startRecording();
+//						rec.setImageResource(R.drawable.stop_button);
+//					} else if (isRecording ==1){
+//						isRecording = 0;
+//		//					stopRecording();
+//						rec.setImageResource(R.drawable.record_button_gray);
+//						recButtonEnabled = 0;
+//						me.setBackgroundColor(meUnpressed);
+//						them.setBackgroundColor(themUnpressed);
+//					}
+//				}
+//			}
+//		});
+//	}
 	
 	public void addListenerOnMeButton() {
 		
@@ -144,19 +175,20 @@ public class RecordEdit extends Activity {
 //				   me.setBackgroundColor(meDepressed);
 				   them.setBackgroundColor(themUnpressed);
 				   me.setBackgroundResource(R.drawable.me_button_highlighted);
-		    	   if(isRecording==0){
-					   recButtonEnabled = 1;
-					   rec.setImageResource(R.drawable.record_button_red);
-				   }
-		    	   System.out.println("me button release");
-		    	   final Button newLine = new Button(RecordEdit.this);
-		    	   newLine.setBackgroundColor(0xfffaebd7);
-		    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-		    	   layoutParams.setMargins(0, 10, 0, 0);
-		    	   String value = "Sampson: " + myLines[myLineIndex%6];
-		    	   myLineIndex++;
-		           newLine.setText(value);
-		           scrollLinLayout.addView(newLine, layoutParams);
+				   rec = (ImageButton) findViewById(R.id.recordButton);
+				   rec.setImageResource(R.drawable.record_button_red);
+//		    	   if(isRecording==0){
+//					   recButtonEnabled = 1;
+//					   rec.setImageResource(R.drawable.record_button_red);
+//				   }
+		    	   System.out.println("me button clicked");
+		    	   isMePressed = true;
+		    	   isThemPressed = false;
+					Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+					i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,  RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+					i.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak!");
+					i.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "com.qwerty.curtaincall");
+					mSpeechRecognizer.startListening(i);
 			   }
 		});
 
@@ -171,22 +203,138 @@ public class RecordEdit extends Activity {
 			   public void onClick(View v) {
 				   me.setBackgroundColor(meUnpressed);
 				   them.setBackgroundResource(R.drawable.them_button_highlighted);
-				   if(isRecording==0){
-					   recButtonEnabled = 1;
-					   rec.setImageResource(R.drawable.record_button_red);
-				   }
-		    	   final Button newLine = new Button(RecordEdit.this);
-		    	   newLine.setBackgroundColor(0xfff8b294);
-		    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-		    	   layoutParams.setMargins(0, 10, 0, 0);
-		    	   String value = "Gregory: " + theirLines[theirLineIndex%6];
-		    	   theirLineIndex++;
-		    	   newLine.setText(value);
-		    	   scrollLinLayout.addView(newLine, layoutParams);
-			     
+				   rec = (ImageButton) findViewById(R.id.recordButton);
+				   rec.setImageResource(R.drawable.record_button_red);
+//				   if(isRecording==0){
+//					   recButtonEnabled = 1;
+//					   rec.setImageResource(R.drawable.record_button_red);
+//				   }
+				   System.out.println("them button clicked");
+		    	   isMePressed = false;
+		    	   isThemPressed = true;
+		    	   
+					Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+					i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,  RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+					i.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak!");
+					i.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "com.qwerty.curtaincall");
+					mSpeechRecognizer.startListening(i);
 			   }
 		});
 
+	}
+
+	@Override
+	public void onBeginningOfSpeech() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onBufferReceived(byte[] arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onEndOfSpeech() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onError(int arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onEvent(int arg0, Bundle arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onPartialResults(Bundle arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onReadyForSpeech(Bundle arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onResults(Bundle arg0) {
+		// TODO Auto-generated method stub
+		ArrayList<String> speechResults = arg0.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+		if (speechResults.size() > 0) {
+			//mResultText.setText(speechResults.get(0));
+    	   final Button newLine = new Button(RecordEdit.this);
+    	   rec = (ImageButton) findViewById(R.id.recordButton);
+    	   rec.setImageResource(R.drawable.record_button_gray);
+    	   if (isMePressed) {
+    		   newLine.setBackgroundColor(0xfffaebd7);
+    	   }
+    	   if (isThemPressed) {
+    		   newLine.setBackgroundColor(0xfff8b294);
+    	   }
+    	   final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+    	   layoutParams.setMargins(0, 10, 0, 0);
+    	   String value = speechResults.get(0);
+    	   newLine.setText(value);
+    	   scrollLinLayout.addView(newLine, layoutParams);
+    	   final ScrollView scroll = (ScrollView) findViewById(R.id.recordEditScrollView);
+    	   scroll.post(new Runnable() {            
+    		    @Override
+    		    public void run() {
+    		           scroll.fullScroll(View.FOCUS_DOWN);              
+    		    }
+    		});
+		} else {
+			System.out.println("Could not detect speech!");
+		}	
+	}
+
+	@Override
+	public void onRmsChanged(float arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void play(View view) throws IllegalArgumentException,
+	                           SecurityException, IllegalStateException, IOException {
+	   MediaPlayer m = new MediaPlayer();
+	   m.setDataSource(outputFile);
+	   m.prepare();
+	   m.start();
+	   Toast.makeText(getApplicationContext(), "Playing audio", Toast.LENGTH_LONG).show();
+	}
+	
+   public void stop(View view){
+	   myAudioRecorder.stop();
+	   myAudioRecorder.release();
+	   myAudioRecorder  = null;
+	   //stop.setEnabled(false);
+	   //play.setEnabled(true);
+	   Toast.makeText(getApplicationContext(), "Audio recorded successfully", Toast.LENGTH_LONG).show();
+   }
+   
+	public void start(View view){
+		try {
+	         myAudioRecorder.prepare();
+	         myAudioRecorder.start();
+	    } catch (IllegalStateException e) {
+	         // TODO Auto-generated catch block
+	         e.printStackTrace();
+	    } catch (IOException e) {
+	         // TODO Auto-generated catch block
+	         e.printStackTrace();
+	    }
+      //start.setEnabled(false);
+      //stop.setEnabled(true);
+      Toast.makeText(getApplicationContext(), "Recording started", Toast.LENGTH_LONG).show();
 	}
 
 }
