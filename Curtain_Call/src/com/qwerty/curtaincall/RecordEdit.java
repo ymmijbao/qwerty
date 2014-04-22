@@ -78,9 +78,6 @@ public class RecordEdit extends Activity {
 		addListenerOnSaveButton();
 		addListenerOnCancelButton();
 		
-		// TODO Sol added:
-		addListenerOnRehearseButton();
-		
 		// Set up audio recorder
 		
 		/*
@@ -370,19 +367,4 @@ public class RecordEdit extends Activity {
 		});
 
 	}
-	
-	// TODO Sol added:
-	public void addListenerOnRehearseButton() {
-		final Button rehearseButton = (Button)findViewById(R.id.rehearseButton);
-		rehearseButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(RecordEdit.this, RehearseActivity.class);
-				intent.putExtra("play", playName);
-				intent.putExtra("chunk", chunkName);
-				startActivity(intent);
-			}
-		});
-	}
-
 }

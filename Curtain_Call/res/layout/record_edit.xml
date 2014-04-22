@@ -63,16 +63,6 @@
         android:text="My line"/>
     
     <Button
-        android:id="@+id/rehearseButton"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/meButton"
-        android:layout_alignBottom="@+id/meButton"
-        android:layout_centerHorizontal="true"
-        android:background="@color/button"
-        android:text="Rehearse" />
-    
-    <Button
         android:id="@+id/themButton"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
