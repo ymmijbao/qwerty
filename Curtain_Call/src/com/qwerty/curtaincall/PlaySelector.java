@@ -103,15 +103,15 @@ public class PlaySelector extends Activity implements OnClickListener {
 		newPlay.setTag(playName);
 		
 		/** To go to the next corresponding screen to add/edit recordings **/
-		newPlay.setOnClickListener(new Button.OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
-				intent.putExtra("play", (CharSequence) view.getTag());
-				startActivity(intent);
-			}
-		});
+//		newPlay.setOnClickListener(new Button.OnClickListener() {
+//
+//			@Override
+//			public void onClick(View view) {
+//				Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
+//				intent.putExtra("play", (CharSequence) view.getTag());
+//				startActivity(intent);
+//			}
+//		});
 		
 		/** To rename the play name once it has been created **/
 		newPlay.setOnLongClickListener(new Button.OnLongClickListener() {
@@ -153,12 +153,13 @@ public class PlaySelector extends Activity implements OnClickListener {
 	}
 	
 	public class MyGestureDetector extends SimpleOnGestureListener {
-		private static final int SWIPE_MIN_DIST = 120;
+		private static final int SWIPE_MIN_DIST = 100;
 		private static final int SWIPE_MAX_OFF_PATH = 250;
-		private static final int SWIPE_THRESHOLD_VELOCITY = 100;
+		private static final int SWIPE_THRESHOLD_VELOCITY = 180;
+		
 		@Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            try {
+            try {            	
                 if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) return false;
 
                 if (e2.getX() - e1.getX() > SWIPE_MIN_DIST && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
@@ -194,7 +195,7 @@ public class PlaySelector extends Activity implements OnClickListener {
     			    });
     			    
     			    alert.show();    	
-                }
+                } 
             } catch (Exception e) {
                 // Do nothing
             }
@@ -204,6 +205,14 @@ public class PlaySelector extends Activity implements OnClickListener {
 
         @Override
         public boolean onDown(MotionEvent e) {
+        	return true;
+        }
+        
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+			Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
+			intent.putExtra("play", (CharSequence) viewTouched.getTag());
+			startActivity(intent);
         	return true;
         }
     }

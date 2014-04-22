@@ -143,6 +143,14 @@ public class ChunkSelector extends Activity implements OnClickListener {
         public boolean onDown(MotionEvent e) {
         	return true;
         }
+        
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+			Intent intent = new Intent(ChunkSelector.this, RecordEdit.class);
+			intent.putExtra("play", (CharSequence) viewTouched.getTag());
+			startActivity(intent);
+        	return true;
+        }
     }
 
 	@Override
@@ -177,17 +185,17 @@ public class ChunkSelector extends Activity implements OnClickListener {
 		newPlay.setText(playName);
 		newPlay.setTag(playName);
 		
-		/** To go to the next corresponding screen to add/edit recordings **/
-		newPlay.setOnClickListener(new Button.OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				Intent intent = new Intent(ChunkSelector.this, RecordEdit.class);
-				intent.putExtra("play", playNameStr);
-				intent.putExtra("chunk", (CharSequence) view.getTag());
-				startActivity(intent);
-			}
-		});
+//		/** To go to the next corresponding screen to add/edit recordings **/
+//		newPlay.setOnClickListener(new Button.OnClickListener() {
+//
+//			@Override
+//			public void onClick(View view) {
+//				Intent intent = new Intent(ChunkSelector.this, RecordEdit.class);
+//				intent.putExtra("play", playNameStr);
+//				intent.putExtra("chunk", (CharSequence) view.getTag());
+//				startActivity(intent);
+//			}
+//		});
 		
 		/** To rename the play name once it has been created **/
 		newPlay.setOnLongClickListener(new Button.OnLongClickListener() {
