@@ -1,5 +1,11 @@
 package com.qwerty.curtaincall;
 
+import java.io.IOException;
+
+import org.json.JSONException;
+
+import com.qwerty.data.DataStorage;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -56,13 +62,19 @@ public class PlaySelector extends Activity implements OnClickListener {
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-					String playName = addNewPlay.getText().toString();
+					String playName = addNewPlay.getText().toString().trim();
 					
 					if (playName.equals("")) {
 						Toast.makeText(getApplicationContext(), "Please enter a play title first", Toast.LENGTH_SHORT).show();
 					} else {
-						addPlay(addNewPlay.getText().toString());
-						addNewPlay.setText("");
+						int returnValue = DataStorage.addPlay(playName);
+						
+						if (returnValue == DataStorage.EXISTS) {
+							Toast.makeText(getApplicationContext(), "The play already exists.", Toast.LENGTH_SHORT).show();
+						} else {
+							addPlay(addNewPlay.getText().toString());
+							addNewPlay.setText("");
+						}
 					}
 				}
 				
