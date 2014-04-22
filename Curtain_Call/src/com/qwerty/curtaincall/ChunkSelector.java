@@ -154,12 +154,12 @@ public class ChunkSelector extends Activity implements OnClickListener {
 	
 	public void addChunk(String chunkName, int source) {		
 		if (chunkName.equals("")) {
-			Toast.makeText(getApplicationContext(), "Please enter a play title first", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), "Please enter a chunk title first", Toast.LENGTH_SHORT).show();
 		} else {
-			int returnValue = DataStorage.addChunk(chunkName, playNameStr, 0); // counter right now
+			int returnValue = DataStorage.addChunk(chunkName, playNameStr, buttonCounter); 
 			
 			if ((returnValue == DataStorage.EXISTS) && (source == PlaySelector.FROM_INPUT)) {
-				Toast.makeText(getApplicationContext(), "The play already exists.", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "The chunk already exists.", Toast.LENGTH_SHORT).show();
 			} else if (source == PlaySelector.FROM_INPUT) {
 				addChunkView(addNewChunk.getText().toString());
 				addNewChunk.setText("");
@@ -170,6 +170,7 @@ public class ChunkSelector extends Activity implements OnClickListener {
 	}
 		
 	public void addChunkView(String playName) {
+		buttonCounter += 1;
 		newPlay = new Button(ChunkSelector.this);
 		newPlay.setBackgroundColor(0xff2975aa);
 		newPlay.setTextColor(0xffffffff);
