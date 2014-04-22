@@ -7,7 +7,7 @@
  
     <!-- Background color -->
     <solid
-        android:color="@color/background_selection" >
+        android:color="@color/background_scrollview" >
     </solid>
  
     <!-- Border -->
