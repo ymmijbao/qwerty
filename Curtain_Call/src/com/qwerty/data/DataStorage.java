@@ -149,7 +149,7 @@ public class DataStorage {
 			return EXCEPTION;
 		}
 
-
+		Log.d("DATASTORAGE", "added chunky: " + lineObject.toString());
 		return 0;
 	}
 
@@ -604,18 +604,18 @@ public class DataStorage {
 				return null;
 			}
 
-			int counter = 0;
+			int lineCounter = 0;
 			while (h.isEmpty() == false) {
 				Line l = h.poll();
-				String s = l.getmActor() + "_" + Integer.toString(counter);
+				String s = l.getmActor() + "_" + Integer.toString(lineCounter);
 				try {
-					linesMap.put(l.getmActor() + "_" + Integer.toString(counter),
+					linesMap.put(l.getmActor() + "_" + Integer.toString(lineCounter),
 							lineObject.getString(s));
 				} catch (JSONException e) {
 					e.printStackTrace();
 					return null;
 				}
-				counter++;
+				lineCounter++;
 			}
 		}
 		return linesMap;
