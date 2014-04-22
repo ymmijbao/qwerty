@@ -1,12 +1,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rehearseLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="@color/light_blue"
+    android:background="@color/background_rehearse"
     tools:context=".RehearseActivity" >
     
     <!-- Title of play and scene -->
@@ -15,9 +16,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:textSize="15sp"
-        android:text="Romeo and Juliet" />
+        android:textSize="20sp"
+        android:text="PLAY TITLE" />
     
+    <!-- 
     <TextView
         android:id="@+id/text_scene_title"
         android:layout_width="wrap_content"
@@ -25,15 +27,44 @@
         android:layout_below="@id/text_play_title"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="12dp"
-        android:textSize="22sp"
-        android:text="Act V" />
+        android:textSize="25sp"
+        android:text="SCENE TITLE" />
+    -->
+    
+    <Spinner
+        android:id="@+id/spinner_scene_jump"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_play_title"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="12dp" />
+    
+    <!-- Skip to the previous scene in the script. -->
+    <ImageButton 
+        android:id="@+id/button_previous_scene"
+        android:contentDescription="Previous Scene"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_toLeftOf="@id/spinner_scene_jump"
+        android:layout_alignBottom="@id/spinner_scene_jump"
+        android:background="@drawable/button_arrow_left" />
+    
+    <!-- Skip to the next scene in the script. -->
+    <ImageButton 
+        android:id="@+id/button_next_scene"
+        android:contentDescription="Next Scene"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_toRightOf="@id/spinner_scene_jump"
+        android:layout_alignBottom="@id/spinner_scene_jump"
+        android:background="@drawable/button_arrow_right" />
     
 	<!-- Scrollview displaying the scene's lines. -->
 	<ScrollView
 	    android:id="@+id/view_lines"
 	    android:layout_width="match_parent"
-	    android:layout_height="200dp"
-	    android:layout_below="@id/text_scene_title"
+	    android:layout_height="275dp"
+	    android:layout_below="@id/spinner_scene_jump"
 	    android:layout_centerHorizontal="true"
 	    android:padding="5dp"
 	    android:background="@drawable/scrollview_rounded_corners" >
@@ -55,33 +86,36 @@
     <ImageButton
         android:id="@+id/button_play"
         android:contentDescription="@string/button_play"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:layout_below="@id/view_lines"
         android:layout_centerHorizontal="true"
-        android:layout_margin="15dp"
+        android:layout_marginTop="25dp"
         android:background="@drawable/play_button" />
     
-    <!-- Skip to the previous scene in the script. -->
-    <Button
-        android:id="@+id/button_previous_scene"
+    <!-- 
+    <LinearLayout
+        android:id="@+id/layout_scene_jump"
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/button_rounded_corners"
-        android:textSize="15dp"
-        android:text="@string/button_previous_scene" />
-    
-    <!-- Skip to the next scene in the script. -->
-    <Button
-        android:id="@+id/button_next_scene"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/button_rounded_corners"
-        android:textSize="15dp"
-        android:text="@string/button_next_scene" />
+        android:layout_gravity="center" >
+        
+	    <TextView
+	        android:id="@+id/text_scene_jump"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginLeft="50dp"
+	        android:textSize="20sp"
+	        android:text="Scene:" />
+	    
+	    <Spinner
+	        android:id="@+id/spinner_scene_jump"
+	        android:layout_width="200dp"
+	        android:layout_height="wrap_content" />
+	    
+	</LinearLayout>
+	-->
 	
 </RelativeLayout>

@@ -7,10 +7,18 @@
     <color name="white">#FFFFFF</color>
     <color name="gray">#777777</color>
     
-    <!-- Other colors -->
+    <!-- Curtain Call color scheme -->
+    <color name="background_selection">#2eb4ed</color> <!-- Background for Play/Chunk Selection screens -->
+    <color name="background_record_edit">#b6e4fa</color> <!-- Background for Record/Edit screen -->
+    <color name="background_rehearse">#b6e4fa</color> <!-- Background for Rehearse screen -->
+    <color name="speaker_me">#faebd7</color> <!-- Used for elements corresponding to "Me" -->
+    <color name="speaker_other">#f8b294</color> <!-- Used for elements corresponding to "Other" -->
+    <color name="text_hint">#404040</color> <!-- Used for hint texts (like in "Add New Play") -->
+    <color name="button">#ff2975aa</color> <!-- Used for normal buttons. -->
+    
+    <!-- Other colors (mainly for testing purposes) -->
     <color name="red">#C80000</color>
     <color name="yellow">#FFFF00</color>
     <color name="cream">#FFFFCC</color>
-    <color name="light_blue">#87CEFA</color>
     
 </resources>

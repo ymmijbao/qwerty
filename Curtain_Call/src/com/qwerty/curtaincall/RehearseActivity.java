@@ -1,14 +1,17 @@
 package com.qwerty.curtaincall;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.json.JSONException;
 
 import com.qwerty.curtaincall.RehearseSettingsActivity.MyPreferenceFragment;
+import com.qwerty.data.DataStorage;
 
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
@@ -21,12 +24,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Typeface;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -35,24 +43,38 @@ import android.widget.Toast;
 /* TODO: 
  * Implement button actions
  * Read in data from Data.java to collect script data
- * Make lines draggable?
  */
 
 public class RehearseActivity extends Activity {
+	
 	/* Rehearsal settings data */
 	private SharedPreferences sharedPref;
-	private boolean omitMyLinesPref;
-	private boolean lineFeedbackPref;
+	private boolean omitMyLinesPref; // TODO incorporate
+	private boolean lineFeedbackPref; // TODO incorporate
 	
-	/* Data about this UI's elements */
-	private Play play;
-	private Scene scene;
-	private RecitableUI currentLine;
+	/* Data about this scene's main elements */
+	private String play; // The name of the play.
+	private String scene; // The name of the scene.
+	private LineTableRow currentLineTR; // The LineTableRow of the current line audio.
+	private ArrayList<LineTableRow> lineData; // The set of line UI elements for the current scene, in order.
+	private Iterator<LineTableRow> lineDataIter; // The iterator for lineData.
 	
 	/* Media tools */
-	private MediaPlayer mediaPlayer;
-	// TODO http://stackoverflow.com/questions/17742477/mediaplayer-progress-update-to-seekbar-not-smooth
-
+	private boolean mIsPlaying; // TRUE if the MediaPlayer is currently playing.
+	private MediaPlayer mediaPlayer; // Plays audio tracks.
+	
+	/* Constants */
+	public static final int LINE_TEXT_SIZE = 20; // The size of the lines in the scene line display, in "scaled pixels" ("sp").
+	public static final String BLANK_LINE = "_______________"; // Represents a blank (omitted) line's text.
+	public static final int HIGHLIGHT_COLOR = R.color.yellow; // Color of the current (highlighted) line.
+	public static final int PLAIN_COLOR = R.color.white; // Color of non-highlighted lines.
+	
+	
+	
+	
+	
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -63,201 +85,339 @@ public class RehearseActivity extends Activity {
 		omitMyLinesPref = sharedPref.getBoolean("pref_omit_my_lines", true);
 		lineFeedbackPref = sharedPref.getBoolean("pref_line_feedback", true);
 		
-		// UI: Set up title and subtitle of play/scene.
-		final TextView playTitleText = (TextView)findViewById(R.id.text_play_title);
-		final TextView sceneTitleText = (TextView)findViewById(R.id.text_scene_title);
+		// Gather intent data from previous activity.
+		Bundle extras = getIntent().getExtras();
+		play = "Romeo and Juliet"; // TODO delete hard-coded, extras.getString("play");
+		scene = "Act IV"; // TODO delete hard-coded, extras.getString("chunk");
 		
-		// TODO Intent i = getIntent();
-		Play samplePlay = new Play("Romeo and Juliet"); // TODO delete hard-coded, i.getStringExtra("play");
-		Scene sampleScene = new Scene("Act IV"); // TODO delete hard-coded, i.getStringExtra("scene");
-		String playTitle = samplePlay.getName();
-		String sceneTitle = sampleScene.getName();
+		// Set MediaPlayer-related variables.
+		mIsPlaying = false;
+		mediaPlayer = new MediaPlayer();
 		
-		playTitleText.setText(playTitle);
-		sceneTitleText.setText(sceneTitle);
-		
-		// UI: Set up the scene line display.
-		int audio1 = R.raw.prince1mp3; // TODO delete hard-coded
-		int audio2 = R.raw.montague1mp3; // TODO delete hard-coded
-		int audio3 = R.raw.prince2mp3; // TODO delete hard-coded
-		scene.addLine(false, "Come, Montague, for thou art early up / To see thy son and heir now early down.", audio1); // TODO delete hard-coded
-		scene.addLine(true, "Alas, my liege, my wife is dead tonight. Grief of my son’s exile hath stopped her breath. What further woe conspires against mine age?", audio2); // TODO delete hard-coded
-		scene.addLine(false, "Look, and thou shalt see.", audio3); // TODO delete hard-coded
-		populateSceneLineDisplay(scene);
+		// Update the play/scene data and the corresponding display.
+		setScene(play, scene);
 		
 		// UI: Set up buttons.
 		final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
-		final Button previousSceneButton = (Button)findViewById(R.id.button_previous_scene);
-		final Button nextSceneButton = (Button)findViewById(R.id.button_next_scene);
+		final Spinner sceneJumpSpinner = (Spinner)findViewById(R.id.spinner_scene_jump);
+		final ImageButton previousSceneButton = (ImageButton)findViewById(R.id.button_previous_scene);
+		final ImageButton nextSceneButton = (ImageButton)findViewById(R.id.button_next_scene);
 		
+		// Set up the play/pause button.
 		playButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// start the playback at the selected line (beginning of scene by default)
-				if (mediaPlayer != null) { // TODO debug
-					playAudio(null);
+				// Start the playback at the selected line (beginning of scene by default).
+				if (!mIsPlaying) {
+					Toast.makeText(getApplicationContext(), "Playing...", Toast.LENGTH_SHORT).show();
+					playAudio();
 				} else {
+					Toast.makeText(getApplicationContext(), "Paused.", Toast.LENGTH_SHORT).show();
 					pauseAudio();
 				}
 			}
 		});
 		
-		// TODO
+		// Set up the scene jump drop-down menu.
+		ArrayList<String> scenes = new ArrayList<String>(); // TODO DataStorage.getAllChunks(play);
+		scenes.add("Act I"); // TODO delete hard-coded
+		scenes.add("Act II"); // TODO delete hard-coded
+		scenes.add("Act III"); // TODO delete hard-coded
+		scenes.add("Act IV"); // TODO delete hard-coded
+		scenes.add("Act V"); // TODO delete hard-coded
+		ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_scene_jump, scenes);
+		spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		sceneJumpSpinner.setAdapter(spinnerArrayAdapter);
+		sceneJumpSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				String newScene = (String)parent.getItemAtPosition(position);
+				setScene(play, newScene);
+			}
+			
+			public void onNothingSelected(AdapterView<?> parent) {
+				// Do nothing.
+			}
+		});
+		
+		// Set up the previous and next buttons.
 		previousSceneButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				stopAudio();
-				
-				// TODO refactor
-				// isPlaying = false;
-				final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
-				playButton.setBackground(getResources().getDrawable(R.drawable.play_button));
-				
-				Scene newScene;
-				if (scene.getName().equals("Act IV")) {
-					newScene = new Scene("Act III"); // TODO get previous scene based on SCENE
-					/*
-					InputStream audio1 = getResources().openRawResource(R.raw.prince1mp3);
-					InputStream audio2 = getResources().openRawResource(R.raw.prince1mp3);
-					InputStream audio3 = getResources().openRawResource(R.raw.prince1mp3);
-					InputStream audio4 = getResources().openRawResource(R.raw.prince1mp3);
-					*/
-					int audio1 = R.raw.prince1mp3;
-					int audio2 = R.raw.montague1mp3;
-					int audio3 = R.raw.prince2mp3;
-					int audio4 = R.raw.prince1mp3;
-					newScene.addLine(false, "You just want one word with one of us? Put it together with something else. Make it a word and a blow.", audio1);
-					newScene.addLine(true, "You’ll find me ready enough to do that, sir, if you give me a reason.", audio2);
-					newScene.addLine(false, "Can’t you find a reason without my giving you one?", audio3);
-					newScene.addLine(true, "Mercutio, you hang out with Romeo.", audio4);
-					setUpScene(newScene);
-				} else if (scene.getName().equals("Act V")) {
-					newScene = new Scene("Act IV"); // TODO get previous scene based on SCENE
-					/*
-					InputStream audio1 = getResources().openRawResource(R.raw.prince1mp3);
-					InputStream audio2 = getResources().openRawResource(R.raw.montague1mp3);
-					InputStream audio3 = getResources().openRawResource(R.raw.prince2mp3);
-					*/
-					int audio1 = R.raw.prince1mp3;
-					int audio2 = R.raw.montague1mp3;
-					int audio3 = R.raw.prince2mp3;
-					newScene.addLine(false, "Come, Montague, for thou art early up / To see thy son and heir now early down.", audio1);
-					newScene.addLine(true, "Alas, my liege, my wife is dead tonight. Grief of my son’s exile hath stopped her breath. What further woe conspires against mine age?", audio2);
-					newScene.addLine(false, "Look, and thou shalt see.", audio3);
-					setUpScene(newScene);
+				int currentIndex = sceneJumpSpinner.getSelectedItemPosition();
+				if (currentIndex > 0) {
+					sceneJumpSpinner.setSelection(currentIndex - 1);
 				}
 			}
 		});
 		
-		// TODO
 		nextSceneButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// go to the next scene
-				
-				// 1. Determine the following scene, based on the current scene's play/script
-				// 2. Call displayScene() to update screen with new scene's data
-				
-				stopAudio();
-				
-				// TODO refactor
-				// isPlaying = false;
-				final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
-				playButton.setBackground(getResources().getDrawable(R.drawable.play_button));
-				
-				Scene newScene;
-				if (scene.getName().equals("Act III")) {
-					newScene = new Scene("Act IV"); // TODO get previous scene based on SCENE
-					/*
-					InputStream audio1 = getResources().openRawResource(R.raw.prince1mp3);
-					InputStream audio2 = getResources().openRawResource(R.raw.montague1mp3);
-					InputStream audio3 = getResources().openRawResource(R.raw.prince2mp3);
-					*/
-					int audio1 = R.raw.prince1mp3;
-					int audio2 = R.raw.montague1mp3;
-					int audio3 = R.raw.prince2mp3;
-					newScene.addLine(false, "Come, Montague, for thou art early up / To see thy son and heir now early down.", audio1);
-					newScene.addLine(true, "Alas, my liege, my wife is dead tonight. Grief of my son’s exile hath stopped her breath. What further woe conspires against mine age?", audio2);
-					newScene.addLine(false, "Look, and thou shalt see.", audio3);
-					setUpScene(newScene);
-				} else if (scene.getName().equals("Act IV")) {
-					newScene = new Scene("Act V"); // TODO get previous scene based on SCENE
-					/*
-					InputStream audio1 = getResources().openRawResource(R.raw.prince1mp3);
-					InputStream audio2 = getResources().openRawResource(R.raw.prince1mp3);
-					InputStream audio3 = getResources().openRawResource(R.raw.prince1mp3);
-					*/
-					int audio1 = R.raw.prince1mp3;
-					int audio2 = R.raw.montague1mp3;
-					int audio3 = R.raw.prince2mp3;
-					newScene.addLine(false, "Have you come to make confession to this father?", audio1);
-					newScene.addLine(true, "If I answered that question, I’d be making confession to you.", audio2);
-					newScene.addLine(false, "Don’t deny to him that you love me.", audio3);
-					setUpScene(newScene);
+				int currentIndex = sceneJumpSpinner.getSelectedItemPosition();
+				if (currentIndex < sceneJumpSpinner.getCount() - 1) {
+					sceneJumpSpinner.setSelection(currentIndex + 1);
 				}
 			}
 		});
 	}
 	
-	// TODO
-	private void playAudio(Recitable line) {
-		// isPlaying = true;
+	private void playAudio() {
+		// If there are no lines in this scene, do nothing.
+		if (currentLineTR == null) {
+			return;
+		}
+		
+		// MediaPlayer is now going to play.
+		mIsPlaying = true;
+		
+		// Update UI buttons.
 		final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
 		playButton.setBackground(getResources().getDrawable(R.drawable.pause_button));
 		
-		if (line == null) {
-			scene.resetLineIndex();
-			line = scene.nextLine();
+		// Start the MediaPlayer.
+		mediaPlayer.start();
+	}
+	
+	private void pauseAudio() {
+		// MediaPlayer is now pausing.
+		mIsPlaying = false;
+		
+		// Update UI buttons.
+		final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
+		playButton.setBackground(getResources().getDrawable(R.drawable.play_button));
+		
+		// Pause the MediaPlayer.
+		mediaPlayer.pause();
+	}
+	
+	private void stopAudio() {
+		// MediaPlayer is now stopping.
+		mIsPlaying = false;
+		
+		// Update UI buttons.
+		final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
+		playButton.setBackground(getResources().getDrawable(R.drawable.play_button));
+		
+		// Stop and reset the MediaPlayer.
+		mediaPlayer.stop();
+		mediaPlayer.release();
+		mediaPlayer.reset();
+	}
+	
+	/* Update the screen to display the new scene. */
+	private void setScene(String newPlay, String newScene) {
+		// Set current play and scene.
+		play = newPlay;
+		scene = newScene;
+		
+		// Set the TextViews displaying the current play and scene titles.
+		final TextView playTV = (TextView)findViewById(R.id.text_play_title);
+		// final TextView sceneTV = (TextView)findViewById(R.id.text_scene_title); // TODO delete
+		playTV.setText(play);
+		// sceneTV.setText(scene); // TODO delete
+		
+		// Obtain all lines from the new scene.
+		LinkedHashMap<String, String> lines = new LinkedHashMap<String, String>(); // TODO DataStorage.getAllLines(play, scene); // TODO fix DataStorage.java
+		
+		// Clear the scrollable view of its current lines.
+		final TableLayout lineTable = (TableLayout)findViewById(R.id.view_table_lines);
+		lineTable.removeAllViews();
+		
+		// Parameters for line UI.
+		TableRow.LayoutParams lpRow = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
+		lpRow.setMargins(0, 10, 0, 0);
+		TableRow.LayoutParams lpSpeaker = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
+		TableRow.LayoutParams lpLine = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
+		
+		// Iterate through the lines, adding them to the display.
+		lineData = new ArrayList<LineTableRow>();
+		Set<Entry<String, String>> linesEntrySet = lines.entrySet();
+		for (Entry<String, String> line : linesEntrySet) {
+			String lineName = line.getKey();
+			String lineAudio = line.getValue();
+			String lineSpeaker = getSpeaker(lineName) + ":";
+			String lineText = "DUMMY TEXT"; // TODO use google transcriber to obtain text
+			
+			// Initialize a new table row.
+			LineTableRow lineTR = new LineTableRow(this, lineName, lineAudio);
+			lineTR.setLayoutParams(lpRow);
+			
+			// The first column represents the speaker (either the user or the "others").
+			TextView speakerTV = new TextView(this);
+			speakerTV.setLayoutParams(lpSpeaker);
+			speakerTV.setText(lineSpeaker + ":");
+			speakerTV.setTextSize(LINE_TEXT_SIZE);
+			speakerTV.setTypeface(Typeface.DEFAULT_BOLD);
+			
+			// The second column represents the actual line.
+			TextView lineTV = new TextView(this);
+			lineTV.setLayoutParams(lpLine);
+			if (lineSpeaker.equals("Me"))
+				lineTV.setText(BLANK_LINE);
+			else
+				lineTV.setText(lineText);
+			lineTV.setTextSize(LINE_TEXT_SIZE);
+			
+			// Add the above two components into the line table row.
+			lineTR.addView(speakerTV);
+			lineTR.addView(lineTV);
+			
+			// Make this line table row click-able.
+			lineTR.setOnClickListener(new OnLineClickListener());
+			
+			// Display this line table row in the ScrollView.
+			lineTable.addView(lineTR);
+			
+			// Add information about this line to the lineData collection.
+			lineData.add(lineTR);
 		}
-		MediaPlayer m = MediaPlayer.create(this, line.getLineAudio());
-		mediaPlayer = m;
+		
+		// Initialize lineData's iterator.
+		lineDataIter = lineData.iterator();
+		LineTableRow lineTR = nextLine(); // First line of this scene (NULL if empty scene).
+			
+		// Reset the MediaPlayer.
+		mIsPlaying = false;
+		mediaPlayer.release();
+		mediaPlayer = new MediaPlayer();
+		
+		// Add a listener to the MediaPlayer to prepare the next track upon completing the current track.
 		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
 			public void onCompletion(MediaPlayer mp) {
-				mp.stop();
-				mp.release();
-				Recitable nextLine = scene.nextLine();
-				if (nextLine != null) {
-					playAudio(nextLine);
+				// Play the next line track. If this was the last line, stop playing.
+				LineTableRow nextLineTR = nextLine();
+				if (nextLineTR != null) {
+					try {
+						mediaPlayer.setDataSource(nextLineTR.getLineAudio());
+						mediaPlayer.prepare();
+						playAudio();
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalStateException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else {
 					stopAudio();
 				}
 			}
 		});
-		if (omitMyLinesPref && line.isMyLine()) {
-			mediaPlayer.setVolume(0, 0);
-		}
-		mediaPlayer.start();
+		
+		// Set the current line to the first line in the scene.
+		setCurrentLine(lineTR);
 	}
 	
-	// TODO
-	private void pauseAudio() {
-		// isPlaying = false;
-		final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
-		playButton.setBackground(getResources().getDrawable(R.drawable.play_button));
-		if (mediaPlayer != null) {
+	// TODO make sure to stop MediaRecorder if it's already playing and set it to play the current line
+	/* Select a line on the scene script. */
+	private void setCurrentLine(LineTableRow newLineTR) {
+		if (currentLineTR != null) {
+			// Un-highlight the previous current line.
+			currentLineTR.setBackgroundColor(PLAIN_COLOR);
+			
+			// Stop playing the previous audio track.
+			stopAudio();
+		}
+		
+		// Set currentLine to newLine.
+		currentLineTR = newLineTR;
+		
+		if (currentLineTR != null) {
+			// Highlight the new current line.
+			currentLineTR.setBackgroundColor(HIGHLIGHT_COLOR);
+			
+			// Set the MediaPlayer's audio file.
 			try {
-				mediaPlayer.pause();
+				mediaPlayer.setDataSource(currentLineTR.getLineAudio());
+				mediaPlayer.prepare();
+				
+				// If the line being played is the user's, mute it. Otherwise, play it at the normal volume.
+				String lineSpeaker = getSpeaker(currentLineTR.getLineName());
+				if (omitMyLinesPref && lineSpeaker.equals("Me")) {
+					mediaPlayer.setVolume(0, 0);
+				} else {
+					mediaPlayer.setVolume(1, 1);
+				}
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} catch (IllegalStateException e) {
-				// TODO
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}
 	
-	// TODO
-	private void stopAudio() {
-		// isPlaying = false;
-		final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
-		playButton.setBackground(getResources().getDrawable(R.drawable.play_button));
-		if (mediaPlayer != null) {
-			try {
-				mediaPlayer.stop();
-				mediaPlayer.release();
-				mediaPlayer = null;
-			} catch (IllegalStateException e) {
-				// TODO
-			}
+	/* Get the next line in lineData. If we are at the end of lineData, reset the iterator. */
+	private LineTableRow nextLine() {
+		LineTableRow nextLineTR;
+		if (lineDataIter.hasNext()) {
+			nextLineTR = lineDataIter.next();
+		} else {
+			nextLineTR = null;
+			lineDataIter = lineData.iterator();
+		}
+		return nextLineTR;
+	}
+	
+	/* A rather sloppy method to determine the speaker of a particular line. */
+	private String getSpeaker(String lineName) {
+		if (lineName.charAt(0) == 'm') {
+			return "Me";
+		} else {
+			return "Them";
 		}
 	}
+	
+	/* OnClickListener used for interacting with the script lines. */
+	private class OnLineClickListener implements View.OnClickListener {
+		public void onClick(View v) {
+			LineTableRow lineTR = (LineTableRow)v;
+			setCurrentLine(lineTR);
+		}
+	}
+	
+	/* Wrapper class that stores lines and their corresponding TableRows. */
+	private class LineTableRow extends TableRow {
+		private String lineName; // The corresponding line's name (e.g., "me_1234" or "them_5382").
+		private String lineAudio; // The corresponding line's audio file path.
+		
+		/* It's a TableRow, but also with the corresponding line saved. */
+		public LineTableRow(Context context, String newLineName, String newLineAudio) {
+			super(context);
+			lineName = newLineName;
+			lineAudio = newLineAudio;
+		}
+		
+		/* It's a TableRow, but also with the corresponding line saved. */
+		public LineTableRow(Context context, AttributeSet attrs, String newLineName, String newLineAudio) {
+			super(context);
+			lineName = newLineName;
+			lineAudio = newLineAudio;
+		}
+		
+		/* Accessor methods. */
+		public String getLineName() { return lineName; }
+		public String getLineAudio() { return lineAudio; }
+	}
+	
+	
+	
+	
+	
+	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -276,235 +436,6 @@ public class RehearseActivity extends Activity {
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
-	}
-	
-	/* Update the screen to display the new scene. */
-	private void setUpScene(Scene newScene) {
-		scene = newScene;
-		final TextView sceneTitleText = (TextView)findViewById(R.id.text_scene_title);
-		sceneTitleText.setText(scene.getName());
-		populateSceneLineDisplay(scene);
-	}
-	
-	/* Update the scrollable view containing the scene lines. */
-	public void populateSceneLineDisplay(Scene scene) {
-		final TableLayout lineTable = (TableLayout)findViewById(R.id.view_table_lines);
-		lineTable.removeAllViews();
-		
-		ArrayList<Recitable> lines = scene.getLines();
-		
-		if (lines.isEmpty()) {
-			setCurrentLine(null);
-		} else {
-			// Highlight the current line (the first line by default).
-			RecitableUI lineUI = new RecitableUI(this, scene.getFirstLine());
-			lineTable.addView(lineUI.getLineTableRow());
-			setCurrentLine(lineUI);
-			
-			// Display the rest of the lines.
-			for (int i = 1; i < lines.size(); i++) {
-				lineUI = new RecitableUI(this, lines.get(i));
-				lineTable.addView(lineUI.getLineTableRow());
-			}
-		}
-	}
-	
-	// Select a line on the scene script.
-	private void setCurrentLine(RecitableUI lineUI) {
-		// unhighlight the previous current line
-		if (currentLine != null)
-			currentLine.unhighlight();
-		currentLine = lineUI;
-		// highlight the new current line
-		if (currentLine != null)
-			currentLine.highlight();
-	}
-
-	/* OnClickListener used for interacting with the script lines. */
-	private class OnLineClickListener implements View.OnClickListener {
-		public void onClick(View v) {
-			// setCurrentLine();
-		}
-	}
-	
-	/* Represents a play, which consists of a collection of scenes. */
-	public class Play {
-		private String name; // the name of this play
-		private ArrayList<Scene> scenes; // the set of scenes (chunks) that comprise this scene
-		
-		public Play() {
-			name = "UNNAMED PLAY";
-			scenes = new ArrayList<Scene>();
-		}
-		
-		public Play(String title) {
-			name = title;
-			scenes = new ArrayList<Scene>();
-		}
-		
-		/* Accessor methods */
-		public String getName() { return name; }
-		public ArrayList<Scene> getScenes() { return scenes; }
-	}
-	
-	/* TODO Represents a scene (i.e., chunk), which consists of a collection of lines. */
-	public class Scene {
-		private String name; // the name of this scene
-		private ArrayList<Recitable> lines; // the set of lines that comprise this scene
-		private int lineIndex; // the index of the current line TODO refactor
-		
-		public Scene() {
-			name = "UNNAMED SCENE";
-			lines = new ArrayList<Recitable>();
-			lineIndex = 0; // TODO refactor
-		}
-		
-		public Scene(String title) {
-			name = title;
-			lines = new ArrayList<Recitable>();
-			lineIndex = 0; // TODO refactor
-		}
-		
-		/* Adds a line to the end of the scene. */
-		public void addLine(boolean myLine, String text, int audio) {
-			Recitable newLine = new Recitable(myLine, text, audio);
-			lines.add(newLine);
-		}
-		
-		/* Returns the first line of the scene. */
-		public Recitable getFirstLine() {
-			if (lines.isEmpty()) {
-				return null;
-			}
-			return lines.get(0);
-		}
-		
-		/* Get the next line in the script. */
-		public Recitable nextLine() {
-			if (lineIndex >= lines.size()) {
-				return null;
-			}
-			Recitable line = lines.get(lineIndex++);
-			// setCurrentLine(line); // TODO
-			return line;
-		}
-		
-		/* Reset the line index to 0. */
-		public void resetLineIndex() {
-			lineIndex = 0;
-		}
-		
-		public String getName() { return name; }
-		public ArrayList<Recitable> getLines() { return lines; }
-	}
-	
-	/* A wrapper class that groups a Recitable (line) with a TableRow UI element for a particular context. */
-	private class RecitableUI {
-		private Context context;
-		private Recitable line;
-		private TableRow lineTableRow;
-		
-		public static final int LINE_TEXT_SIZE = 20; // the size of the lines in the scene line display, in "scaled pixels" (sp)
-		public static final String BLANK_LINE = "_______________"; // represents a blank (omitted) line's text
-		public static final int HIGHLIGHT_COLOR = R.color.yellow;
-		public static final int PLAIN_COLOR = R.color.white;
-		
-		public RecitableUI(Context c, Recitable r) {
-			context = c;
-			line = r;
-			
-			lineTableRow = new TableRow(c);
-			
-			// The first column represents the speaker (either the user or the "others")
-			TextView speakerText = new TextView(c);
-			speakerText.setText(line.getSpeaker() + ":");
-			speakerText.setTextSize(LINE_TEXT_SIZE);
-			speakerText.setTypeface(Typeface.DEFAULT_BOLD);
-			
-			// The second column represents the actual line
-			TextView lineText = new TextView(c);
-			if (line.isMyLine())
-				lineText.setText(BLANK_LINE);
-			else
-				lineText.setText(line.getLineText());
-			lineText.setTextSize(LINE_TEXT_SIZE);
-			
-			lineTableRow.addView(speakerText);
-			lineTableRow.addView(lineText);
-			
-			// Make this row clickable
-			lineTableRow.setOnClickListener(new OnLineClickListener());
-		}
-		
-		public RecitableUI(Context c, Recitable r, TableRow.LayoutParams lpRow,
-				TableRow.LayoutParams lpSpeaker, TableRow.LayoutParams lpLine) {
-			context = c;
-			line = r;
-			
-			lineTableRow = new TableRow(c);
-			lineTableRow.setLayoutParams(lpRow);
-			
-			// The first column represents the speaker (either the user or the "others")
-			TextView speakerText = new TextView(c);
-			speakerText.setLayoutParams(lpSpeaker);
-			speakerText.setText(line.getSpeaker() + ":");
-			speakerText.setTextSize(LINE_TEXT_SIZE);
-			speakerText.setTypeface(Typeface.DEFAULT_BOLD);
-			
-			// The second column represents the actual line
-			TextView lineText = new TextView(c);
-			lineText.setLayoutParams(lpLine);
-			if (line.isMyLine())
-				lineText.setText(BLANK_LINE);
-			else
-				lineText.setText(line.getLineText());
-			lineText.setTextSize(LINE_TEXT_SIZE);
-			
-			lineTableRow.addView(speakerText);
-			lineTableRow.addView(lineText);
-			
-			// Make this row clickable
-			lineTableRow.setOnClickListener(new OnLineClickListener());
-		}
-		
-		/* Highlight this line. */
-		public void highlight() {
-			lineTableRow.setBackgroundColor(getResources().getColor(HIGHLIGHT_COLOR));
-		}
-		
-		/* Un-highlight this line. */
-		public void unhighlight() {
-			lineTableRow.setBackgroundColor(getResources().getColor(PLAIN_COLOR));
-		}
-		
-		/* Accessor methods. */
-		public Context getContext() { return context; }
-		public Recitable getLine() { return line; }
-		public TableRow getLineTableRow() { return lineTableRow; }
-	}
-	
-	/* Represents a continuous line in a script. */
-	public class Recitable {
-		private boolean isMyLine; // true if the user's line, false if others' lines
-		private String lineText; // the line, as text
-		private int lineAudio; // the line, as audio
-		
-		/* Creates a new scene line. */
-		public Recitable(boolean myLine, String text, int audio) {
-			isMyLine = myLine;
-			lineText = text;
-			lineAudio = audio;
-		}
-		
-		/* Returns "You" if the line is the user's; otherwise returns "Them". */
-		public String getSpeaker() {
-			return isMyLine ? "You" : "Them";
-		}
-		
-		/* Accessor methods. */
-		public boolean isMyLine() { return isMyLine; }
-		public String getLineText() { return lineText; }
-		public int getLineAudio() { return lineAudio; }
 	}
 }
 

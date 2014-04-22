@@ -7,14 +7,16 @@
  
     <!-- Background color -->
     <solid
-        android:color="@color/cream" >
+        android:color="@color/background_selection" >
     </solid>
  
     <!-- Border -->
+    <!-- 
     <stroke
         android:width="3dp"
         android:color="@color/black" >
     </stroke>
+    -->
  
     <!-- Padding -->
     <padding
