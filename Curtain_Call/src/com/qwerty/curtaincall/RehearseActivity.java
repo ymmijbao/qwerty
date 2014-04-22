@@ -42,6 +42,7 @@ import android.widget.Toast;
 
 /* TODO: 
  * Read in data from Data.java to collect script data
+ * WAKE_LOCK permission to prevent dimming
  * scroll.post(new Runnable() {            
 
     @Override
@@ -191,9 +192,7 @@ public class RehearseActivity extends Activity {
 		playButton.setBackground(getResources().getDrawable(R.drawable.play_button));
 		
 		// Pause the MediaPlayer.
-		if (mediaPlayer.isPlaying()) {
-			mediaPlayer.pause();
-		}
+		mediaPlayer.pause();
 	}
 	
 	private void stopAudio() {
@@ -205,9 +204,7 @@ public class RehearseActivity extends Activity {
 		playButton.setBackground(getResources().getDrawable(R.drawable.play_button));
 		
 		// Stop the MediaPlayer.
-		if (mediaPlayer.isPlaying()) {
-			mediaPlayer.stop();
-		}
+		mediaPlayer.stop();
 		mediaPlayer.release();
 	}
 	
@@ -353,7 +350,7 @@ public class RehearseActivity extends Activity {
 				// If the line being played is the user's, mute it. Otherwise, play it at the normal volume.
 				String lineSpeaker = getSpeaker(currentLineTR.getLineName());
 				if (omitMyLinesPref && lineSpeaker.equals("Me")) {
-					mediaPlayer.setVolume(1, 1); // TODO set to 0, 0
+					mediaPlayer.setVolume(0, 0); // TODO set to 0, 0
 				} else {
 					mediaPlayer.setVolume(1, 1);
 				}
