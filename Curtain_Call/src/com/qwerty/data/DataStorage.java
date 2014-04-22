@@ -134,6 +134,7 @@ public class DataStorage {
 		JSONObject lineObject = new JSONObject();
 		try {
 			lineObject.put("position", position);
+			lineObject.put("counter", 0);
 			lineObject.put("lines", new JSONObject());
 			chunks.put(chunk, lineObject);
 			writeToFile("plays/play_" + parent, chunks.toString());
