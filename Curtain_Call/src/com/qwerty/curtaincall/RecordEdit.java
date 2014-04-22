@@ -1,6 +1,9 @@
 package com.qwerty.curtaincall;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,6 +11,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -68,10 +72,15 @@ public class RecordEdit extends Activity {
 		
 		// Set up audio recorder
 		
-//		outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/myrecording.3gp";;
+		/*
+		outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/myrecording.3gp";
+		Log.d("RECORDEDIT", outputFile + " is the output file");
+		myAudioRecorder.setOutputFile(outputFile);
+		Log.d("RECORDEDIT", "SUCCESSFULLY SET OUTPUTFILE TO AUDIORECORDER");
+		*/
 		
-	    
-//	    myAudioRecorder.setOutputFile(outputFile);
+		// Retrieve all existing lines in the chunk and display them
+		displayExistingLines();
 	}
 
 	
@@ -114,11 +123,15 @@ public class RecordEdit extends Activity {
 	    myAudioRecorder = null;
 	    final Button newLine = new Button(RecordEdit.this);
 		if (myLine){
-			DataStorage.addLine(playName, chunkName, outputFile, "me");
+			int result = DataStorage.addLine(playName, chunkName, outputFile, "me");
+			Log.d("RECORDEDIT", "attempting to add button for output: " + outputFile);
+			Log.d("RECORDEDIT", "success?: " + result);
 			newLine.setBackgroundColor(0xfffaebd7);
 			value = lineIndex + ": My Line";
 		} else {
-			DataStorage.addLine(playName, chunkName, outputFile, "them");
+			int result = DataStorage.addLine(playName, chunkName, outputFile, "them");
+			Log.d("RECORDEDIT", "attempting to add button for output: " + outputFile);
+			Log.d("RECORDEDIT", "success?: " + result);
 			newLine.setBackgroundColor(0xfff8b294);
 			value = lineIndex + ": Other Line";
 		}
@@ -129,7 +142,41 @@ public class RecordEdit extends Activity {
 	   newLine.setText(value);
        scrollLinLayout.addView(newLine, layoutParams);
        
-       
+       	// DEBUG
+        /*
+   		LinkedHashMap<String, String> lines = DataStorage.getAllLines(playName, chunkName);
+   		Set<Entry<String, String>> lineEntries = lines.entrySet();
+   		for (Entry<String, String> lineEntry : lineEntries) {
+   			Log.d("RECORDEDIT", lineEntry.getKey() + "..." + lineEntry.getValue());
+   		}
+   		*/
+	}
+	
+	/** Display all existing lines in the chunk. */
+	private void displayExistingLines() {
+		LinkedHashMap<String, String> lines = DataStorage.getAllLines(playName, chunkName);
+		Set<Entry<String, String>> lineEntries = lines.entrySet();
+		for (Entry<String, String> lineEntry : lineEntries) {
+			String lineName = lineEntry.getKey();
+			String lineAudio = lineEntry.getValue();
+			
+			final Button newLine = new Button(RecordEdit.this);
+			if (lineName.charAt(0) == 'm'){
+				DataStorage.addLine(playName, chunkName, outputFile, "me");
+				newLine.setBackgroundColor(0xfffaebd7);
+				value = lineIndex + ": My Line";
+			} else {
+				DataStorage.addLine(playName, chunkName, outputFile, "them");
+				newLine.setBackgroundColor(0xfff8b294);
+				value = lineIndex + ": Other Line";
+			}
+			lineIndex++;
+			newLine.setGravity(Gravity.LEFT);
+			final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+			layoutParams.setMargins(0, 10, 0, 0);
+			newLine.setText(value);
+			scrollLinLayout.addView(newLine, layoutParams);
+		}
 	}
 	
 	/**

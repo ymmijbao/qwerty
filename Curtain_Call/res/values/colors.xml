@@ -9,8 +9,8 @@
     
     <!-- Curtain Call color scheme -->
     <color name="background_selection">#2eb4ed</color> <!-- Background for Play/Chunk Selection screens -->
-    <color name="background_record_edit">#b6e4fa</color> <!-- Background for Record/Edit screen -->
-    <color name="background_rehearse">#b6e4fa</color> <!-- Background for Rehearse screen -->
+    <color name="background_record_edit">#2eb4ed</color> <!-- Background for Record/Edit screen -->
+    <color name="background_rehearse">#2eb4ed</color> <!-- Background for Rehearse screen -->
     <color name="background_scrollview">#ff5dc5f1</color> <!-- Background for ScrollViews displaying lines -->
     <color name="speaker_me">#faebd7</color> <!-- Used for elements corresponding to "Me" -->
     <color name="speaker_other">#f8b294</color> <!-- Used for elements corresponding to "Other" -->

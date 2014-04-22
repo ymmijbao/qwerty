@@ -147,7 +147,8 @@ public class ChunkSelector extends Activity implements OnClickListener {
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
 			Intent intent = new Intent(ChunkSelector.this, RecordEdit.class);
-			intent.putExtra("play", (CharSequence) viewTouched.getTag());
+			intent.putExtra("play", playNameStr);
+			intent.putExtra("chunk", (CharSequence)viewTouched.getTag());
 			startActivity(intent);
         	return true;
         }

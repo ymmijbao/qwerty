@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Environment;
+import android.util.Log;
 
 /**
  * @author vinitnayak Class that handles all persistent data storage for the
@@ -172,7 +173,6 @@ public class DataStorage {
 		if (!f.exists()) {
 			return -1;
 		}
-
 		Scanner scanner;
 		try {
 			scanner = new Scanner(new File(f.getAbsolutePath()))
@@ -183,15 +183,16 @@ public class DataStorage {
 		}
 
 		JSONObject chunks = new JSONObject();
-
 		if (scanner.hasNext()) {
 			try {
 				chunks = new JSONObject(scanner.next());
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
+				Log.d("DATASTORAGE", "checkpoint1.1");
+				Log.d("DATASTORAGE", "Printing specificChunk: " + specificChunk.toString());
 				int counter = specificChunk.getInt("counter");
+				Log.d("DATASTORAGE", "checkpoint1.2");
 				String actorKey = actor + "_" + counter;
 				counter++;
-				
 				JSONObject lineObject = ((JSONObject) chunks.get(chunk))
 						.getJSONObject("lines");
 				lineObject.put(actorKey, filePath);
