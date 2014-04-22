@@ -25,6 +25,8 @@ import android.util.Log;
  */
 public class DataStorage {
 
+	public static final int EXISTS = -1;
+	
 	/**
 	 * Add a new play to the storage Returns 0 if the save was successful, -1
 	 * otherwise
@@ -34,20 +36,29 @@ public class DataStorage {
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	public static int addPlay(String play) throws JSONException, IOException {
+	public static int addPlay(String play) {
 		String fileDirPath = getJsonDirectory();
 		File f = new File(fileDirPath + "/play.txt");
 		JSONObject jsonObject = new JSONObject();
 
 		// If play file has already been created
 		if (f.exists()) {
-			String content = new Scanner(new File(f.getAbsolutePath()))
-					.useDelimiter("\\Z").next();
-
-			jsonObject = new JSONObject(content);
-			if (jsonObject.has(play)) {
-				return -1;
+			String content;
+			try {
+				content = new Scanner(new File(f.getAbsolutePath()))
+						.useDelimiter("\\Z").next();
+				jsonObject = new JSONObject(content);
+				if (jsonObject.has(play)) {
+					return EXISTS;
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+
 		} else {
 			File file = new File(Environment.getExternalStoragePublicDirectory(
 					"/CurtainCall").getAbsolutePath());
@@ -67,6 +78,12 @@ public class DataStorage {
 			e1.printStackTrace();
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		return 0;
