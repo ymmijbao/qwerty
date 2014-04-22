@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="#b6e4fa"
+    android:background="#44ace1"
     tools:context=".RecordEdit" >
 
     <ScrollView
@@ -34,8 +34,8 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
         android:background="#faebd7"
-        android:text="My line" />
-
+        android:text="My line"/>
+    
     <Button
         android:id="@+id/themButton"
         android:layout_width="100dp"
