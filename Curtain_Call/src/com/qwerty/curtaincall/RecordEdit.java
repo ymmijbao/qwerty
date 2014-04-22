@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -48,6 +49,8 @@ public class RecordEdit extends Activity {
 	int meUnpressed=0xfffaebd7;
 	int themDepressed=0xffe04e0f;
 	int themUnpressed=0xfff8b294;
+	
+	private MediaPlayer mediaPlayer;
 	
 	String playName, chunkName, value;
 	boolean myLine;
@@ -163,6 +166,29 @@ public class RecordEdit extends Activity {
 		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 		layoutParams.setMargins(0, 10, 0, 0);
 		newLine.setText(value);
+		final String tempFile = outputFile;
+		//clickable newLine buttons
+		newLine.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v){
+				try {
+					playAudio(tempFile);
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalStateException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		
 		scrollLinLayout.addView(newLine, layoutParams);
 		final ScrollView scroll = (ScrollView) findViewById(R.id.recordEditScrollView);
 		scroll.post(new Runnable() {            
@@ -180,6 +206,18 @@ public class RecordEdit extends Activity {
    		}
 			 */		
 	}
+	
+	
+	/**Play audio for clicked lines*/
+	private void playAudio(String file) throws IllegalArgumentException,   
+	   SecurityException, IllegalStateException, IOException{
+	   MediaPlayer m = new MediaPlayer();
+	   m.setDataSource(file);
+	   m.prepare();
+	   m.start();
+	   Toast.makeText(getApplicationContext(), "Playing audio", Toast.LENGTH_LONG).show();
+	}
+	
 	
 	/** Display all existing lines in the chunk. */
 	private void displayExistingLines() {
