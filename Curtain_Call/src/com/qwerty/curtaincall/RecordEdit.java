@@ -35,15 +35,15 @@ public class RecordEdit extends Activity {
 	Button me;
 	Button them;
 	ImageButton rec;
-	String[] myLines;
-	String[] theirLines;
-	int lineIndex=1;
+
+	int lineIndex = 1;
 	int isRecording;
 	int recButtonEnabled;
 	int meDepressed=0xffebae5d;
 	int meUnpressed=0xfffaebd7;
 	int themDepressed=0xffe04e0f;
 	int themUnpressed=0xfff8b294;
+	
 	String playName, chunkName, value;
 	boolean myLine;
 	
@@ -132,6 +132,7 @@ public class RecordEdit extends Activity {
 			recButtonEnabled = 0;
 			me.setBackgroundColor(meUnpressed);
 			them.setBackgroundColor(themUnpressed);
+			DataStorage.deleteLine(playName, chunkName, lineIndex - 1);
 			return;
 		}
 		myAudioRecorder.release();
