@@ -134,7 +134,7 @@ public class DataStorage {
 		JSONObject lineObject = new JSONObject();
 		try {
 			lineObject.put("position", position);
-			lineObject.put("counter", 0);
+			lineObject.put("counter", 0); 
 			lineObject.put("lines", new JSONObject());
 			chunks.put(chunk, lineObject);
 			writeToFile("plays/play_" + parent, chunks.toString());
@@ -477,6 +477,8 @@ public class DataStorage {
 							+ Integer.toString(l.getmPosition());
 					if (currentLine == position) {
 						lineObject.remove(s);
+						File lineFile = new File(l.getmFilePath());
+						lineFile.delete();
 						positionFound = true;
 						break;
 					}

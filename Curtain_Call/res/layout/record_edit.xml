@@ -9,12 +9,37 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="#44ace1"
     tools:context=".RecordEdit" >
-
+        
+        <Button
+            android:id="@+id/saveRecordingButton"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/recordEditScrollView"
+            android:layout_marginRight="10dp"
+	        android:layout_marginBottom="10dp"
+	        android:layout_alignParentTop="true"
+	        android:background="#44e179" 
+	        android:text="Save"
+            />
+        <Button
+            android:id="@+id/cancelRecordingButton"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/recordEditScrollView"
+            android:layout_marginLeft="10dp"
+	        android:layout_marginBottom="10dp"
+	        android:background="#e1445e"
+	        android:layout_alignParentTop="true"
+	        android:text="Cancel"
+            />
+        
+    
     <ScrollView
         android:id="@+id/recordEditScrollView"
         android:layout_width="fill_parent"
         android:layout_height="300dp"
         android:layout_marginBottom="10dp"
+        android:layout_below="@id/saveRecordingButton"
         android:background="@drawable/scrollview_rounded_corners" >
 
         <LinearLayout
@@ -50,13 +75,12 @@
     
     <ImageButton
         android:id="@+id/recordButton"
-        android:layout_width="wrap_content"
+        android:layout_width="75dp"
         android:layout_height="wrap_content"
         android:scaleType="fitCenter"
         android:layout_above="@id/meButton"
         android:layout_below="@id/recordEditScrollView"
         android:layout_centerHorizontal="true"
-        android:adjustViewBounds="true"
         android:src="@drawable/record_button_gray"
         android:enabled="false"
         android:background="@null"/>
