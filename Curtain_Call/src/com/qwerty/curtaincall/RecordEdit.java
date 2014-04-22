@@ -141,12 +141,13 @@ public class RecordEdit extends Activity {
 
 		me.setOnClickListener(new OnClickListener() {
 			   public void onClick(View v) {
-//				   me.setBackgroundColor(meDepressed);
 				   them.setBackgroundColor(themUnpressed);
 				   me.setBackgroundResource(R.drawable.me_button_highlighted);
 		    	   if(isRecording==0){
 					   recButtonEnabled = 1;
 					   rec.setImageResource(R.drawable.record_button_red);
+				   } else {
+//					   switchLine
 				   }
 		    	   System.out.println("me button release");
 		    	   final Button newLine = new Button(RecordEdit.this);
