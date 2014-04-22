@@ -492,7 +492,7 @@ public class DataStorage {
 					e.printStackTrace();
 					return null;
 				}
-				Iterator<String> i = chunks.keys();
+				Iterator<String> i = (Iterator<String>) chunks.keys();
 
 				while (i.hasNext()) {
 					chunkList.add(i.next());
