@@ -25,6 +25,9 @@ import android.util.Log;
  */
 public class DataStorage {
 
+	public static final int EXISTS = -1;
+	public static final int EXCEPTION = -1;
+	
 	/**
 	 * Add a new play to the storage Returns 0 if the save was successful, -1
 	 * otherwise
@@ -34,20 +37,29 @@ public class DataStorage {
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	public static int addPlay(String play) throws JSONException, IOException {
+	public static int addPlay(String play) {
 		String fileDirPath = getJsonDirectory();
 		File f = new File(fileDirPath + "/play.txt");
 		JSONObject jsonObject = new JSONObject();
 
 		// If play file has already been created
 		if (f.exists()) {
-			String content = new Scanner(new File(f.getAbsolutePath()))
-					.useDelimiter("\\Z").next();
-
-			jsonObject = new JSONObject(content);
-			if (jsonObject.has(play)) {
-				return -1;
+			String content;
+			try {
+				content = new Scanner(new File(f.getAbsolutePath()))
+						.useDelimiter("\\Z").next();
+				jsonObject = new JSONObject(content);
+				if (jsonObject.has(play)) {
+					return EXISTS;
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return EXCEPTION;
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return EXCEPTION;
 			}
+
 		} else {
 			File file = new File(Environment.getExternalStoragePublicDirectory(
 					"/CurtainCall").getAbsolutePath());
@@ -65,8 +77,16 @@ public class DataStorage {
 			writeToFile("Play", jsonObject.toString());
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
+			return EXCEPTION;
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
+			return EXCEPTION;
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return EXCEPTION;
 		}
 
 		return 0;
@@ -76,9 +96,7 @@ public class DataStorage {
 	 * Add a chunk to the given parent play at given position Cannot have
 	 * duplicate chunk names. Returns 0 if successful, -1 otherwise.
 	 */
-	public static int addChunk(String chunk, String parent, int position)
-			throws FileNotFoundException, JSONException,
-			UnsupportedEncodingException {
+	public static int addChunk(String chunk, String parent, int position) {
 		String dir = getJsonDirectory();
 		dir += "/plays/play_" + parent + ".txt";
 
@@ -87,14 +105,25 @@ public class DataStorage {
 			return -1;
 		}
 		
-		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
-				.useDelimiter("\\Z");
+		Scanner scanner = null;
+		try {
+			scanner = new Scanner(new File(f.getAbsolutePath()))
+					.useDelimiter("\\Z");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		}
 
 		JSONObject chunks = new JSONObject();
 
 		// Check if file is empty
 		if (scanner.hasNext()) {
-			chunks = new JSONObject(scanner.next());
+			try {
+				chunks = new JSONObject(scanner.next());
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return EXCEPTION;
+			}
 
 			if (chunks.has(chunk)) {
 				return -1;
@@ -103,12 +132,23 @@ public class DataStorage {
 		}
 
 		JSONObject lineObject = new JSONObject();
-		lineObject.put("position", position);
-		lineObject.put("lines", new JSONObject());
+		try {
+			lineObject.put("position", position);
+			lineObject.put("lines", new JSONObject());
+			chunks.put(chunk, lineObject);
+			writeToFile("plays/play_" + parent, chunks.toString());
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		}
 
-		chunks.put(chunk, lineObject);
 
-		writeToFile("plays/play_" + parent, chunks.toString());
 		return 0;
 	}
 
@@ -125,8 +165,7 @@ public class DataStorage {
 	 *            Literally the string "me" or "them"
 	 */
 	public static int addLine(String play, String chunk, String filePath,
-			String actor) throws FileNotFoundException, JSONException,
-			UnsupportedEncodingException {
+			String actor) {
 		String dir = getJsonDirectory();
 		dir += "/plays/play_" + play + ".txt";
 
@@ -135,25 +174,42 @@ public class DataStorage {
 			return -1;
 		}
 
-		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
-				.useDelimiter("\\Z");
+		Scanner scanner;
+		try {
+			scanner = new Scanner(new File(f.getAbsolutePath()))
+					.useDelimiter("\\Z");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		}
 
 		JSONObject chunks = new JSONObject();
 
 		if (scanner.hasNext()) {
-			chunks = new JSONObject(scanner.next());
-			JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
-			int counter = specificChunk.getInt("counter");
-			String actorKey = actor + "_" + counter;
-			counter++;
-
-			JSONObject lineObject = ((JSONObject) chunks.get(chunk))
-					.getJSONObject("lines");
-			lineObject.put(actorKey, filePath);
-			specificChunk.put("lines", lineObject);
-			specificChunk.put("counter", counter);
-			chunks.put(chunk, specificChunk);
-			writeToFile("plays/play_" + play, chunks.toString());
+			try {
+				chunks = new JSONObject(scanner.next());
+				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
+				int counter = specificChunk.getInt("counter");
+				String actorKey = actor + "_" + counter;
+				counter++;
+				
+				JSONObject lineObject = ((JSONObject) chunks.get(chunk))
+						.getJSONObject("lines");
+				lineObject.put(actorKey, filePath);
+				specificChunk.put("lines", lineObject);
+				specificChunk.put("counter", counter);
+				chunks.put(chunk, specificChunk);
+				writeToFile("plays/play_" + play, chunks.toString());
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return EXCEPTION;
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return EXCEPTION;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				return EXCEPTION;
+			}
 			return 0;
 		} else {
 			return -1;
@@ -167,8 +223,7 @@ public class DataStorage {
 	 * @throws JSONException
 	 * @throws FileNotFoundException
 	 */
-	public static ArrayList<String> getAllPlays() throws JSONException,
-			FileNotFoundException {
+	public static ArrayList<String> getAllPlays() {
 		ArrayList<String> playList = new ArrayList<String>();
 		String fileDirPath = getJsonDirectory();
 		File f = new File(fileDirPath + "/play.txt");
@@ -176,10 +231,19 @@ public class DataStorage {
 
 		// If play file has already been created
 		if (f.exists()) {
-			String content = new Scanner(new File(f.getAbsolutePath()))
-					.useDelimiter("\\Z").next();
+			String content;
+			try {
+				content = new Scanner(new File(f.getAbsolutePath()))
+						.useDelimiter("\\Z").next();
+				jsonObject = new JSONObject(content);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return null;
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return null;
+			}
 
-			jsonObject = new JSONObject(content);
 			Iterator i = jsonObject.keys();
 			while (i.hasNext()) {
 				playList.add((String) i.next());
@@ -197,8 +261,7 @@ public class DataStorage {
 	 * @throws FileNotFoundException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static int deletePlay(String play) throws JSONException,
-			FileNotFoundException, UnsupportedEncodingException {
+	public static int deletePlay(String play) {
 		String dir = getJsonDirectory();
 		dir += "/plays/play_" + play + ".txt";
 
@@ -207,28 +270,48 @@ public class DataStorage {
 			return -1;
 		}
 
-		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
-				.useDelimiter("\\Z");
+		Scanner scanner;
+		try {
+			scanner = new Scanner(new File(f.getAbsolutePath()))
+					.useDelimiter("\\Z");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		}
 
 		JSONObject chunks = new JSONObject();
 
 		if (scanner.hasNext()) {
 
-			chunks = new JSONObject(scanner.next());
+			try {
+				chunks = new JSONObject(scanner.next());
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return EXCEPTION;
+			}
 			Iterator<String> chunkList = chunks.keys();
 			// For each chunk in the play, we iterate over each line for that
 			// chunk,
 			// deleting each audio file associated with a line
 			while (chunkList.hasNext()) {
 				String currentChunk = chunkList.next();
-				JSONObject obj = chunks.getJSONObject(currentChunk);
-
-				Iterator<String> lineIterator = ((JSONObject) obj.get("lines"))
-						.keys();
-
-				while (lineIterator.hasNext()) {
-					// Get each line audio file and delete it from the device.
+				JSONObject obj;
+				try {
+					
+					obj = chunks.getJSONObject(currentChunk);
+					Iterator<String> lineIterator = ((JSONObject) obj.get("lines"))
+							.keys();
+					while (lineIterator.hasNext()) {
+						// Get each line audio file and delete it from the device.
+					}
+					
+					
+				} catch (JSONException e) {
+					e.printStackTrace();
+					return EXCEPTION;
 				}
+
+
 			}
 			scanner.close();
 			boolean deleteSuccess = f.delete();
@@ -245,7 +328,15 @@ public class DataStorage {
 		JSONObject jsonObject = new JSONObject();
 
 		jsonObject.remove(play);
-		writeToFile("Play", jsonObject.toString());
+		try {
+			writeToFile("Play", jsonObject.toString());
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return EXCEPTION;
+		}
 		return 0;
 	}
 
@@ -375,23 +466,33 @@ public class DataStorage {
 	 * @throws JSONException
 	 * @throws FileNotFoundException
 	 */
-	public static ArrayList<String> getAllChunks(String play)
-			throws JSONException, FileNotFoundException {
+	public static ArrayList<String> getAllChunks(String play) {
 		ArrayList<String> chunkList = new ArrayList<String>();
 		String dir = getJsonDirectory();
 		dir += "/plays/play_" + play + ".txt";
 
 		File f = new File(dir);
 		if (f.exists()) {
-			Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
-					.useDelimiter("\\Z");
+			Scanner scanner;
+			try {
+				scanner = new Scanner(new File(f.getAbsolutePath()))
+						.useDelimiter("\\Z");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return null;
+			}
 
 			JSONObject chunks = new JSONObject();
 
 			// Check if file is empty
 			if (scanner.hasNext()) {
-				chunks = new JSONObject(scanner.next());
-				Iterator<String> i = chunks.keys();
+				try {
+					chunks = new JSONObject(scanner.next());
+				} catch (JSONException e) {
+					e.printStackTrace();
+					return null;
+				}
+				Iterator<String> i = (Iterator<String>) chunks.keys();
 
 				while (i.hasNext()) {
 					chunkList.add(i.next());
@@ -411,7 +512,7 @@ public class DataStorage {
 	 * @param chunk
 	 */
 	public static LinkedHashMap<String, String> getAllLines(String parent,
-			String chunk) throws FileNotFoundException, JSONException {
+			String chunk) {
 		String dir = getJsonDirectory();
 		dir += "/plays/play_" + parent + ".txt";
 
@@ -420,8 +521,14 @@ public class DataStorage {
 			return null;
 		}
 
-		Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
-				.useDelimiter("\\Z");
+		Scanner scanner;
+		try {
+			scanner = new Scanner(new File(f.getAbsolutePath()))
+					.useDelimiter("\\Z");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
 
 		JSONObject chunks = new JSONObject();
 		Comparator<Line> c = new LineComparator();
@@ -431,25 +538,36 @@ public class DataStorage {
 
 		if (scanner.hasNext()) {
 			linesMap = new LinkedHashMap<String, String>();
-
-			chunks = new JSONObject(scanner.next());
-			JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
-			JSONObject lineObject = ((JSONObject) chunks.get(chunk))
-					.getJSONObject("lines");
-
-			Iterator<String> i = lineObject.keys();
-			while (i.hasNext()) {
-				String s = i.next();
-				Line l = new Line(Integer.parseInt(s.split("_")[1]),
-						lineObject.getString(s), s.split("_")[0]);
-				h.add(l);
+			
+			JSONObject lineObject = null;
+			try {
+				chunks = new JSONObject(scanner.next());
+				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
+				lineObject = ((JSONObject) chunks.get(chunk))
+						.getJSONObject("lines");
+				Iterator<String> i = lineObject.keys();
+				while (i.hasNext()) {
+					String s = i.next();
+					Line l = new Line(Integer.parseInt(s.split("_")[1]),
+							lineObject.getString(s), s.split("_")[0]);
+					h.add(l);
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return null;
 			}
+
 			int counter = 0;
 			while (h.isEmpty() == false) {
 				Line l = h.poll();
 				String s = l.getmActor() + "_" + Integer.toString(counter);
-				linesMap.put(l.getmActor() + "_" + Integer.toString(counter),
-						lineObject.getString(s));
+				try {
+					linesMap.put(l.getmActor() + "_" + Integer.toString(counter),
+							lineObject.getString(s));
+				} catch (JSONException e) {
+					e.printStackTrace();
+					return null;
+				}
 				counter++;
 			}
 		}
@@ -461,7 +579,7 @@ public class DataStorage {
 	 */
 	private static String getJsonDirectory() {
 		File file = new File(Environment.getExternalStoragePublicDirectory(
-				"/CurtainCall").getAbsolutePath());// +"/score.txt");
+				"/CurtainCall").getAbsolutePath());
 		return file.getAbsolutePath();
 	}
 
