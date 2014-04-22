@@ -215,7 +215,6 @@ public class RecordEdit extends Activity {
 	   m.setDataSource(file);
 	   m.prepare();
 	   m.start();
-	   Toast.makeText(getApplicationContext(), "Playing audio", Toast.LENGTH_LONG).show();
 	}
 	
 	
