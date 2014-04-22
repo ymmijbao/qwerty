@@ -81,7 +81,7 @@ public class RecordEdit extends Activity {
 		*/
 		
 		// Retrieve all existing lines in the chunk and display them
-		displayExistingLines();
+		//displayExistingLines();
 	}
 
 	
@@ -100,9 +100,9 @@ public class RecordEdit extends Activity {
 //	         e.printStackTrace();
 //	      }
 		if (myLine){
-			outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/myLine" + System.currentTimeMillis() + ".3gp";
+			outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/CurtainCall/myLine" + System.currentTimeMillis() + ".3gp";
 		} else {
-			outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/theirLine" + System.currentTimeMillis()+ ".3gp";
+			outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/CurtainCall/theirLine" + System.currentTimeMillis()+ ".3gp";
 		}
 		System.out.println("OutputFile: "+ outputFile);
 		myAudioRecorder.setOutputFile(outputFile);
@@ -119,10 +119,24 @@ public class RecordEdit extends Activity {
 	}
 	
 	private void stopRecording(){
-		myAudioRecorder.stop();
-	    myAudioRecorder.release();
-	    myAudioRecorder = null;
-	    final Button newLine = new Button(RecordEdit.this);
+		try {
+			myAudioRecorder.stop();			
+		} catch(RuntimeException stopException) {
+			Log.d("STOPBUG", "stopException thrown");
+			Toast toast = Toast.makeText(getApplicationContext(), "I didn't quite catch that, please slow down.", Toast.LENGTH_LONG);
+			toast.show();
+			myAudioRecorder.release();
+			myAudioRecorder = null;
+			isRecording = 0;
+			rec.setImageResource(R.drawable.record_button_gray);
+			recButtonEnabled = 0;
+			me.setBackgroundColor(meUnpressed);
+			them.setBackgroundColor(themUnpressed);
+			return;
+		}
+		myAudioRecorder.release();
+		myAudioRecorder = null;
+		final Button newLine = new Button(RecordEdit.this);
 		if (myLine){
 			int result = DataStorage.addLine(playName, chunkName, outputFile, "me");
 			Log.d("RECORDEDIT", "attempting to add button for output: " + outputFile);
@@ -137,26 +151,26 @@ public class RecordEdit extends Activity {
 			value = lineIndex + ": Other Line";
 		}
 		lineIndex++;
-	   newLine.setGravity(Gravity.LEFT);
+		newLine.setGravity(Gravity.LEFT);
 		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-	   layoutParams.setMargins(0, 10, 0, 0);
-	   newLine.setText(value);
-       scrollLinLayout.addView(newLine, layoutParams);
-	  	final ScrollView scroll = (ScrollView) findViewById(R.id.recordEditScrollView);
-    	scroll.post(new Runnable() {            
-    		@Override
-		    public void run() {
-    			scroll.fullScroll(View.FOCUS_DOWN);              
-		    }
+		layoutParams.setMargins(0, 10, 0, 0);
+		newLine.setText(value);
+		scrollLinLayout.addView(newLine, layoutParams);
+		final ScrollView scroll = (ScrollView) findViewById(R.id.recordEditScrollView);
+		scroll.post(new Runnable() {            
+			@Override
+			public void run() {
+				scroll.fullScroll(View.FOCUS_DOWN);              
+			}
 		});
-       	// DEBUG
-        /*
+			// DEBUG
+			/*
    		LinkedHashMap<String, String> lines = DataStorage.getAllLines(playName, chunkName);
    		Set<Entry<String, String>> lineEntries = lines.entrySet();
    		for (Entry<String, String> lineEntry : lineEntries) {
    			Log.d("RECORDEDIT", lineEntry.getKey() + "..." + lineEntry.getValue());
    		}
-   		*/
+			 */		
 	}
 	
 	/** Display all existing lines in the chunk. */
