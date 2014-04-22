@@ -1,6 +1,7 @@
 package com.qwerty.curtaincall;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.json.JSONException;
 
@@ -37,6 +38,9 @@ public class PlaySelector extends Activity implements OnClickListener {
 	private EditText addNewPlay;
 	private Button newPlay;
 	View.OnTouchListener gestureListener;
+	
+	public static final int FROM_INPUT = 1;
+	public static final int FROM_STORAGE = 2;
 		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +59,7 @@ public class PlaySelector extends Activity implements OnClickListener {
             	return false;
             }
         };
-        
+		        
         addNewPlay = (EditText) findViewById(R.id.add_new_play);
         addNewPlay.setOnKeyListener(new View.OnKeyListener() {
 
@@ -63,24 +67,94 @@ public class PlaySelector extends Activity implements OnClickListener {
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
 					String playName = addNewPlay.getText().toString().trim();
-					
-					if (playName.equals("")) {
-						Toast.makeText(getApplicationContext(), "Please enter a play title first", Toast.LENGTH_SHORT).show();
-					} else {
-						int returnValue = DataStorage.addPlay(playName);
-						
-						if (returnValue == DataStorage.EXISTS) {
-							Toast.makeText(getApplicationContext(), "The play already exists.", Toast.LENGTH_SHORT).show();
-						} else {
-							addPlay(addNewPlay.getText().toString());
-							addNewPlay.setText("");
-						}
-					}
+					addPlay(playName, PlaySelector.FROM_INPUT);
 				}
 				
 				return false;
 			}
         });
+        
+		/** Populate buttons for all plays currently stored on the phone **/
+		ArrayList<String> playsList = DataStorage.getAllPlays();
+		
+		for (String playName : playsList) {
+			addPlay(playName, PlaySelector.FROM_STORAGE);
+		}
+	}
+	
+	public void addPlay(String playName, int source) {		
+		if (playName.equals("")) {
+			Toast.makeText(getApplicationContext(), "Please enter a play title first", Toast.LENGTH_SHORT).show();
+		} else {
+			int returnValue = DataStorage.addPlay(playName);
+			
+			if ((returnValue == DataStorage.EXISTS) && (source == PlaySelector.FROM_INPUT)) {
+				Toast.makeText(getApplicationContext(), "The play already exists.", Toast.LENGTH_SHORT).show();
+			} else if (source == PlaySelector.FROM_INPUT) {
+				addPlayView(addNewPlay.getText().toString());
+				addNewPlay.setText("");
+			} else if (source == PlaySelector.FROM_STORAGE) {
+				addPlayView(playName);
+			}
+		}
+	}
+	
+	/** Adds a button to the layout to represent the play **/
+	public void addPlayView(String playName) {
+		newPlay = new Button(PlaySelector.this);
+		newPlay.setBackgroundColor(0xff2975aa);
+		newPlay.setTextColor(0xffffffff);
+		newPlay.setText(playName);
+		newPlay.setTag(playName);
+		
+		/** To go to the next corresponding screen to add/edit recordings **/
+		newPlay.setOnClickListener(new Button.OnClickListener() {
+
+			@Override
+			public void onClick(View view) {
+				Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
+				intent.putExtra("play", (CharSequence) view.getTag());
+				startActivity(intent);
+			}
+		});
+		
+		/** To rename the play name once it has been created **/
+		newPlay.setOnLongClickListener(new Button.OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View view) {
+			    AlertDialog.Builder alert = new AlertDialog.Builder(PlaySelector.this);
+			    final EditText input = new EditText(PlaySelector.this);
+			    input.setText((CharSequence) view.getTag());
+			    alert.setView(input);
+			    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			    	
+			        public void onClick(DialogInterface dialog, int whichButton) {
+			            String value = input.getText().toString().trim();
+			            newPlay.setText(value);
+			            newPlay.setTag(value);
+			        }
+			    });
+
+			    alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			    	
+			        public void onClick(DialogInterface dialog, int whichButton) {
+			            dialog.cancel();
+			        }
+			    });
+			    
+			    alert.show(); 
+				return false;
+			}
+		});
+		
+		/** To detect gestures defined in the MyGestureDetector class **/
+		newPlay.setOnTouchListener(gestureListener);
+						
+		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+		layoutParams.setMargins(0, 10, 0, 0);
+		
+		scrollLinLayout.addView(newPlay, layoutParams);		
 	}
 	
 	public class MyGestureDetector extends SimpleOnGestureListener {
@@ -140,66 +214,7 @@ public class PlaySelector extends Activity implements OnClickListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		//MenuInflater inflater = getMenuInflater();
-		//inflater.inflate(R.menu.play_selector, menu);
 		return super.onCreateOptionsMenu(menu);
-	}
-		
-	public void addPlay(String playName) {
-		newPlay = new Button(PlaySelector.this);
-		newPlay.setBackgroundColor(0xff2975aa);
-		newPlay.setTextColor(0xffffffff);
-		newPlay.setText(playName);
-		newPlay.setTag(playName);
-		
-		/** To go to the next corresponding screen to add/edit recordings **/
-		newPlay.setOnClickListener(new Button.OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
-				intent.putExtra("play", (CharSequence) view.getTag());
-				startActivity(intent);
-			}
-		});
-		
-		/** To rename the play name once it has been created **/
-		newPlay.setOnLongClickListener(new Button.OnLongClickListener() {
-
-			@Override
-			public boolean onLongClick(View view) {
-			    AlertDialog.Builder alert = new AlertDialog.Builder(PlaySelector.this);
-			    final EditText input = new EditText(PlaySelector.this);
-			    input.setText((CharSequence) view.getTag());
-			    alert.setView(input);
-			    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			    	
-			        public void onClick(DialogInterface dialog, int whichButton) {
-			            String value = input.getText().toString().trim();
-			            newPlay.setText(value);
-			            newPlay.setTag(value);
-			        }
-			    });
-
-			    alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			    	
-			        public void onClick(DialogInterface dialog, int whichButton) {
-			            dialog.cancel();
-			        }
-			    });
-			    
-			    alert.show(); 
-				return false;
-			}
-		});
-		
-		/** To detect gestures defined in the MyGestureDetector class **/
-		newPlay.setOnTouchListener(gestureListener);
-						
-		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-		layoutParams.setMargins(0, 10, 0, 0);
-		
-		scrollLinLayout.addView(newPlay, layoutParams);		
 	}
 
 	@Override
