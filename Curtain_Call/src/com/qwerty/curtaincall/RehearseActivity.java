@@ -19,11 +19,13 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.app.Activity;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Typeface;
+import android.support.v4.app.NavUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
@@ -423,16 +425,34 @@ public class RehearseActivity extends Activity {
 		return true;
 	}
 	
+//	@Override
+//	public boolean onOptionsItemSelected(MenuItem item) {
+//	    // Handle item selection
+//	    switch (item.getItemId()) {
+//	        case R.id.action_settings:
+//	        	startActivity(new Intent(RehearseActivity.this, RehearseSettingsActivity.class));
+//	            return true;
+//	        default:
+//	            return super.onOptionsItemSelected(item);
+//	    }
+//	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle item selection
-	    switch (item.getItemId()) {
-	        case R.id.action_settings:
-	        	startActivity(new Intent(RehearseActivity.this, RehearseSettingsActivity.class));
-	            return true;
-	        default:
-	            return super.onOptionsItemSelected(item);
-	    }
+		switch (item.getItemId()) {
+		case android.R.id.home:			
+			Intent upIntent = NavUtils.getParentActivityIntent(this);
+			upIntent.putExtra("play", play);
+			upIntent.putExtra("chunk", scene);
+			
+	        if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+	            TaskStackBuilder.create(this).addNextIntentWithParentStack(upIntent).startActivities();
+	        } else {
+	            NavUtils.navigateUpTo(this, upIntent);
+	        }
+	        return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 }
 

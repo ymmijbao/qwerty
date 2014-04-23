@@ -5,9 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.TaskStackBuilder;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -65,6 +67,9 @@ public class RecordEdit extends Activity {
 		// Show the Up button in the action bar.
 		setupActionBar();
 		
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		
 		// assign the layouts to the private vars
 		mainLayout = (RelativeLayout) findViewById(R.id.recordEditLayout);
 		scrollLinLayout = (LinearLayout) findViewById(R.id.recordEditLinearLayout);
@@ -91,7 +96,7 @@ public class RecordEdit extends Activity {
 		*/
 		
 		// Retrieve all existing lines in the chunk and display them
-		displayExistingLines();
+		//displayExistingLines();
 	}
 
 	
@@ -215,6 +220,7 @@ public class RecordEdit extends Activity {
 	   m.setDataSource(file);
 	   m.prepare();
 	   m.start();
+	   Toast.makeText(getApplicationContext(), "Playing audio", Toast.LENGTH_LONG).show();
 	}
 	
 	
@@ -264,16 +270,17 @@ public class RecordEdit extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case android.R.id.home:
-			// This ID represents the Home or Up button. In the case of this
-			// activity, the Up button is shown. Use NavUtils to allow users
-			// to navigate up one level in the application structure. For
-			// more details, see the Navigation pattern on Android Design:
-			//
-			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
-			//
-			NavUtils.navigateUpFromSameTask(this);
-			return true;
+		case android.R.id.home:			
+			Intent upIntent = NavUtils.getParentActivityIntent(this);
+			upIntent.putExtra("play", playName);
+			upIntent.putExtra("chunk", chunkName);
+			
+	        if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+	            TaskStackBuilder.create(this).addNextIntentWithParentStack(upIntent).startActivities();
+	        } else {
+	            NavUtils.navigateUpTo(this, upIntent);
+	        }
+	        return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
