@@ -228,81 +228,62 @@ public class DataStorage {
 
 		return 0;
 	}
-
+	
+	
 	/**
 	 * Pass in the current name of the play into @param oldName and the 
 	 * desired name of the play as @param newName
 	 * @return 0 if successful, non zero otherwise
 	 */
-//	public static int renameChunk(String play, String oldChunkName, String newChunkName) {
-//		String dir = getJsonDirectory();
-//		dir += "/plays/play_" + play+ ".txt";
-//
-//		File f = new File(dir);
-//		if (!f.exists()) {
-//			return -1;
-//		}
-//		
-//		FileChannel src;
-//		FileChannel dest;
-//		
-//		try {
-//			Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
-//					.useDelimiter("\\Z");
-//
-//			JSONObject allPlays = new JSONObject();
-//			if (scanner.hasNext()) {
-//				allPlays = new JSONObject(scanner.next());
-//				// If new name play exists or old play doesn't exist
-//				if (allPlays.has(oldChunkName) || allPlays.has(oldName) == false) {
-//					return -1;
-//				}
-//				Log.d("TAGGIN", "FUC22K");
-//				// Else delete the old one and replace it w/ the new name
-//				String oldPlayPath = allPlays.getString(oldName);
-//
-//				allPlays.remove(oldName);
-//
-//				File playFile = new File(getJsonDirectory() + "/plays/play_"
-//						+ oldName + ".txt");
-//				Log.d("TAGGIN", "FUC33K");
-//
-//				File newFile = new File(getJsonDirectory() + "/plays/play_"
-//						+ oldChunkName,  + ".txt");
-//				newFile.createNewFile();
-//
-//				// Copy contents of original file into new file
-//				src = new FileInputStream(playFile).getChannel();
-//				dest = new FileOutputStream(newFile).getChannel();
-//				dest.transferFrom(src, 0, src.size());
-//
-//				try {
-//					src.close();
-//					dest.close();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//					return -1;
-//				}
-//				
-//				// Delete the old file and put in new file path into play.txt
-//				playFile.delete();
-//				allPlays.put(oldChunkName, , newFile.getAbsolutePath());
-//			}
-//
-//			writeToFile("Play", allPlays.toString());
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		return 0;
-//	}
+	public static int renameChunk(String play, String oldName, String newName) {
+		String dir = getJsonDirectory();
+		dir += "/plays/play_" + play + ".txt";
+
+		File f = new File(dir);
+		if (!f.exists()) {
+			return -1;
+		}
+		
+		FileChannel src;
+		FileChannel dest;
+		
+		try {
+			Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+					.useDelimiter("\\Z");
+
+			JSONObject allChunks = new JSONObject();
+			if (scanner.hasNext()) {
+				allChunks = new JSONObject(scanner.next());
+				// If new name play exists or old play doesn't exist
+				if (allChunks.has(newName) || allChunks.has(oldName) == false) {
+					return -1;
+				}
+				// Save json object associated with old name
+				JSONObject oldObj = allChunks.getJSONObject(oldName);
+				
+				allChunks.remove(oldName);
+				
+				// Then put in the new name
+				allChunks.put(newName, oldObj);
+				writeToFile("plays/play_" + play, allChunks.toString());
+			} else {
+				return -1;
+			}
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return 0;
+	}
+
 	
 	/**
 	 * Adds a specific recording/line to the play and chunk specified.
