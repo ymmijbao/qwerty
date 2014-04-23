@@ -523,8 +523,9 @@ public class DataStorage {
 				Iterator<String> lineIterator = ((JSONObject) specificChunk
 						.get("lines")).keys();
 				while (lineIterator.hasNext()) {
-					String audioFilePath = lineIterator.next();
-					// Add code here to remove file
+					String path = specificChunk.getJSONObject("lines").getString(lineIterator.next());
+					File lineFile = new File(path);
+					lineFile.delete();
 				}
 
 			} catch (JSONException e) {
