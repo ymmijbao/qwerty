@@ -76,7 +76,7 @@ public class RehearseActivity extends Activity {
 	public static final int LINE_TEXT_SIZE = 20; // The size of the lines in the scene line display, in "scaled pixels" ("sp").
 	public static final String BLANK_LINE = "_______________"; // Represents a blank (omitted) line's text.
 	public static final int HIGHLIGHT_COLOR = R.color.yellow; // Color of the current (highlighted) line.
-	public static final int PLAIN_COLOR = R.color.white; // Color of non-highlighted lines.
+	public static final int PLAIN_COLOR = R.color.transparent; // Color of non-highlighted lines.
 	
 	
 	
@@ -182,23 +182,9 @@ public class RehearseActivity extends Activity {
 		Log.d("REHEARSEACTIVITY", "Attempting to start the MediaPlayer...");
 		mediaPlayer = new MediaPlayer();
 		Log.d("REHEARSEACTIVITY", "Data source: " + currentLineTR.getLineAudio());
-		try {
-			mediaPlayer.setDataSource(currentLineTR.getLineAudio());
-			mediaPlayer.prepare();
-			mediaPlayer.start();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		setUpMediaPlayer(currentLineTR.getLineAudio());
+		mediaPlayer.start();
 	}
 	
 	private void pauseAudio() {
@@ -288,8 +274,8 @@ public class RehearseActivity extends Activity {
 			lineTR.addView(speakerTV);
 			lineTR.addView(lineTV);
 			
-			// Make this line table row click-able.
-			lineTR.setOnClickListener(new OnLineClickListener());
+			// TODO Make this line table row click-able.
+			// lineTR.setOnClickListener(new OnLineClickListener());
 			
 			// Display this line table row in the ScrollView.
 			lineTable.addView(lineTR);
@@ -309,47 +295,23 @@ public class RehearseActivity extends Activity {
 		mediaPlayer.release();
 		mediaPlayer = new MediaPlayer();
 		
-		// Add a listener to the MediaPlayer to prepare the next track upon completing the current track.
-		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-			public void onCompletion(MediaPlayer mp) {
-				// Play the next line track. If this was the last line, stop playing.
-				Log.d("REHEARSEACTIVITY", "Finished playing track");
-				LineTableRow nextLineTR = nextLine();
-				if (nextLineTR != null) {
-					try {
-						mediaPlayer.setDataSource(nextLineTR.getLineAudio());
-						mediaPlayer.prepare();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (SecurityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalStateException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				} else {
-					stopAudio();
-				}
-			}
-		});
-		
 		// Set the current line to the first line in the scene.
 		setCurrentLine(lineTR);
 	}
 	
 	/* Select a line on the scene script. */
 	private void setCurrentLine(LineTableRow newLineTR) {
+		Log.d("REHEARSEACTIVITY", "setting current line to new one");
+		mediaPlayer.release();
+		mediaPlayer = new MediaPlayer();
+		
 		if (currentLineTR != null) {
 			// Un-highlight the previous current line.
-			currentLineTR.setBackgroundColor(PLAIN_COLOR);
+			Log.d("REHEARSEACTIVITY", "setting old bacgkround color back to defaul0t; old current line is: " + currentLineTR.getLineName());
+			currentLineTR.setBackgroundColor(getResources().getColor(PLAIN_COLOR));
 			
-			// Stop playing the previous audio track.
-			stopAudio();
+			// TODO Stop playing the previous audio track.
+			// stopAudio();
 		}
 		
 		// Set currentLine to newLine.
@@ -357,34 +319,7 @@ public class RehearseActivity extends Activity {
 		
 		if (currentLineTR != null) {
 			// Highlight the new current line.
-			currentLineTR.setBackgroundColor(HIGHLIGHT_COLOR);
-			
-			// Set the MediaPlayer's audio file.
-			try {
-				mediaPlayer.setDataSource(currentLineTR.getLineAudio());
-				mediaPlayer.prepare();
-				Log.d("REHEARSEACTIVITY", "Successfully set data source for line audio:" + currentLineTR.getLineAudio());
-				
-				// If the line being played is the user's, mute it. Otherwise, play it at the normal volume.
-				String lineSpeaker = getSpeaker(currentLineTR.getLineName());
-				if (omitMyLinesPref && lineSpeaker.equals("Me")) {
-					mediaPlayer.setVolume(0, 0); // TODO set to 0, 0
-				} else {
-					mediaPlayer.setVolume(1, 1);
-				}
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			currentLineTR.setBackgroundColor(getResources().getColor(HIGHLIGHT_COLOR));
 		}
 	}
 	
@@ -393,9 +328,11 @@ public class RehearseActivity extends Activity {
 		LineTableRow nextLineTR;
 		if (lineDataIter.hasNext()) {
 			nextLineTR = lineDataIter.next();
+			setCurrentLine(nextLineTR);
 		} else {
 			nextLineTR = null;
 			lineDataIter = lineData.iterator();
+			setCurrentLine(null);
 		}
 		return nextLineTR;
 	}
@@ -411,12 +348,13 @@ public class RehearseActivity extends Activity {
 	}
 	
 	/* OnClickListener used for interacting with the script lines. */
+	/*
 	private class OnLineClickListener implements View.OnClickListener {
 		public void onClick(View v) {
 			LineTableRow lineTR = (LineTableRow)v;
 			setCurrentLine(lineTR);
 		}
-	}
+	} */
 	
 	/* Wrapper class that stores lines and their corresponding TableRows. */
 	private class LineTableRow extends TableRow {
@@ -444,7 +382,37 @@ public class RehearseActivity extends Activity {
 	
 	
 	
-	
+	/* Helper function to remake mediaPlayer. */
+	private void setUpMediaPlayer(String dataSource) {
+		mediaPlayer.release();
+		mediaPlayer = new MediaPlayer();
+		try {
+			mediaPlayer.setDataSource(dataSource);
+			mediaPlayer.prepare();
+			mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+				public void onCompletion(MediaPlayer mp) {
+					// Play the next line track. If this was the last line, stop playing.
+					Log.d("REHEARSEACTIVITY", "Finished playing track");
+					LineTableRow nextLineTR = nextLine();
+					if (nextLineTR != null) {
+						setUpMediaPlayer(nextLineTR.getLineAudio());
+					}
+				}
+			});
+		} catch (IllegalArgumentException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (SecurityException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalStateException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
 	
 	
 	

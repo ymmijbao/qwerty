@@ -6,6 +6,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -18,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -34,6 +38,7 @@ public class RecordEdit extends Activity {
 	
 	Button me;
 	Button them;
+	Button save, cancel;
 	ImageButton rec;
 
 	int lineIndex = 1;
@@ -70,9 +75,8 @@ public class RecordEdit extends Activity {
 		addListenerOnMeButton();
 		addListenerOnThemButton();
 		addListenerOnRecordButton();
-		
-		// TODO Sol added:
-		addListenerOnRehearseButton();
+		addListenerOnSaveButton();
+		addListenerOnCancelButton();
 		
 		// Set up audio recorder
 		
@@ -84,7 +88,7 @@ public class RecordEdit extends Activity {
 		*/
 		
 		// Retrieve all existing lines in the chunk and display them
-		//displayExistingLines();
+		displayExistingLines();
 	}
 
 	
@@ -237,6 +241,52 @@ public class RecordEdit extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
+	public void addListenerOnSaveButton() {
+		save = (Button) findViewById(R.id.saveRecordingButton);
+		save.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v){
+				Intent intent = new Intent(RecordEdit.this, RehearseActivity.class);
+				intent.putExtra("play", playName);
+				intent.putExtra("chunk", chunkName);
+				startActivity(intent);
+			}
+		});
+	}
+	public void addListenerOnCancelButton(){
+		Log.d("listener", "listener set up called");
+		cancel = (Button) findViewById(R.id.cancelRecordingButton);
+		cancel.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v){
+				AlertDialog.Builder alert = new AlertDialog.Builder(RecordEdit.this);
+				alert.setTitle("Cancel Recording");
+				alert.setMessage("Are you sure you want to cancel? Your latest recordings will be deleted.");
+				alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			    	
+			        public void onClick(DialogInterface dialog, int whichButton) {
+			            dialog.cancel();
+			            Intent intent = new Intent(RecordEdit.this, ChunkSelector.class);
+						intent.putExtra("play", playName);
+						startActivity(intent);
+			            //delete recordings
+			            //go back to chunk selector
+			        }
+			    });
+
+			    alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			    	
+			        public void onClick(DialogInterface dialog, int whichButton) {
+			            dialog.cancel();
+			        }
+			    });
+			    
+			    alert.show(); 
+				
+			}
+		});
+	}
+	
 	public void addListenerOnRecordButton() {
 		rec = (ImageButton) findViewById(R.id.recordButton);
 		recButtonEnabled=0;
@@ -317,19 +367,4 @@ public class RecordEdit extends Activity {
 		});
 
 	}
-	
-	// TODO Sol added:
-	public void addListenerOnRehearseButton() {
-		final Button rehearseButton = (Button)findViewById(R.id.rehearseButton);
-		rehearseButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(RecordEdit.this, RehearseActivity.class);
-				intent.putExtra("play", playName);
-				intent.putExtra("chunk", chunkName);
-				startActivity(intent);
-			}
-		});
-	}
-
 }
