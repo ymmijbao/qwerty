@@ -96,7 +96,7 @@ public class RecordEdit extends Activity {
 		*/
 		
 		// Retrieve all existing lines in the chunk and display them
-		//displayExistingLines();
+		displayExistingLines();
 	}
 
 	
