@@ -386,21 +386,34 @@ public class RehearseActivity extends Activity {
 	
 	/* Helper function to remake mediaPlayer. */
 	private void setUpMediaPlayer(String dataSource) {
-		mediaPlayer.release();
+		// mediaPlayer.release();
+		Log.d("REHEARSEACTIVITY", "starting setup again");
 		mediaPlayer = new MediaPlayer();
 		try {
+			Log.d("REHEARSEACTIVITY", "entering trycatch again");
 			mediaPlayer.setDataSource(dataSource);
 			mediaPlayer.prepare();
+			Log.d("REHEARSEACTIVITY", "setting up listener");
 			mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
 				public void onCompletion(MediaPlayer mp) {
 					// Play the next line track. If this was the last line, stop playing.
 					Log.d("REHEARSEACTIVITY", "Finished playing track");
 					LineTableRow nextLineTR = nextLine();
 					if (nextLineTR != null) {
+						Log.d("REHEARSEACTIVITY", "setting up next track.... setupmediaplayer");
+						mediaPlayer.release();
 						setUpMediaPlayer(nextLineTR.getLineAudio());
+					} else {
+						mediaPlayer.release();
+						setUpMediaPlayer(nextLine().getLineAudio());
 					}
 				}
 			});
+			if (getSpeaker(currentLineTR.getLineName()).equals("Me")) { // TODO omitMyLinesPref && 
+				mediaPlayer.setVolume(0, 0); // TODO set to 0, 0
+			} else {
+				mediaPlayer.setVolume(1, 1);
+			}
 		} catch (IllegalArgumentException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -414,6 +427,7 @@ public class RehearseActivity extends Activity {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		mediaPlayer.start();
 	}
 	
 	
