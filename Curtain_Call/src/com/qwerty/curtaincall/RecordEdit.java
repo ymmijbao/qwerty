@@ -238,6 +238,27 @@ public class RecordEdit extends Activity {
 			}
 			lineIndex++;
 			newLine.setGravity(Gravity.LEFT);
+			final String tempFile = lineAudio;
+            newLine.setOnClickListener(new OnClickListener(){
+                    @Override
+                    public void onClick(View v){
+                            try {
+                                    playAudio(tempFile);
+                            } catch (IllegalArgumentException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                            } catch (SecurityException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                            } catch (IllegalStateException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                            } catch (IOException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                            }
+                    }
+            });
 			final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 			layoutParams.setMargins(0, 10, 0, 0);
 			newLine.setText(value);

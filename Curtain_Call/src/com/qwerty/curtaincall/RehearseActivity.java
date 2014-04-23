@@ -310,7 +310,7 @@ public class RehearseActivity extends Activity {
 			Log.d("REHEARSEACTIVITY", "setting old bacgkround color back to defaul0t; old current line is: " + currentLineTR.getLineName());
 			currentLineTR.setBackgroundColor(getResources().getColor(PLAIN_COLOR));
 			
-			// TODO Stop playing the previous audio track.
+			// Stop playing the previous audio track.
 			// stopAudio();
 		}
 		
