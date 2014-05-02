@@ -39,23 +39,15 @@ public class RecordEdit extends Activity {
 	private RelativeLayout mainLayout;
 	private LinearLayout scrollLinLayout;
 	
-	Button me;
-	Button them;
+	ImageButton me, them;
 	Button save, cancel;
-	ImageButton rec;
 
 	int lineIndex = 1;
-	int isRecording;
-	int recButtonEnabled;
-	int meDepressed=0xffebae5d;
-	int meUnpressed=0xfffaebd7;
-	int themDepressed=0xffe04e0f;
-	int themUnpressed=0xfff8b294;
 	
 	private MediaPlayer mediaPlayer;
 	
 	String playName, chunkName, value;
-	boolean myLine;
+	boolean myLineRec, themLineRec;
 	
 	private MediaRecorder myAudioRecorder;
 	private String outputFile = null;
@@ -82,7 +74,6 @@ public class RecordEdit extends Activity {
 		// Set up the listeners
 		addListenerOnMeButton();
 		addListenerOnThemButton();
-		addListenerOnRecordButton();
 		addListenerOnSaveButton();
 		addListenerOnCancelButton();
 		
@@ -114,7 +105,7 @@ public class RecordEdit extends Activity {
 //	         // TODO Auto-generated catch block
 //	         e.printStackTrace();
 //	      }
-		if (myLine){
+		if (myLineRec){
 			outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/CurtainCall/myLine" + System.currentTimeMillis() + ".3gp";
 		} else {
 			outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/CurtainCall/theirLine" + System.currentTimeMillis()+ ".3gp";
@@ -142,18 +133,13 @@ public class RecordEdit extends Activity {
 			toast.show();
 			myAudioRecorder.release();
 			myAudioRecorder = null;
-			isRecording = 0;
-			rec.setImageResource(R.drawable.record_button_gray);
-			recButtonEnabled = 0;
-			me.setBackgroundColor(meUnpressed);
-			them.setBackgroundColor(themUnpressed);
 			DataStorage.deleteLine(playName, chunkName, lineIndex - 1);
 			return;
 		}
 		myAudioRecorder.release();
 		myAudioRecorder = null;
 		final Button newLine = new Button(RecordEdit.this);
-		if (myLine){
+		if (myLineRec){
 			int result = DataStorage.addLine(playName, chunkName, outputFile, "me");
 			Log.d("RECORDEDIT", "attempting to add button for output: " + outputFile);
 			Log.d("RECORDEDIT", "success?: " + result);
@@ -351,56 +337,59 @@ public class RecordEdit extends Activity {
 		});
 	}
 	
-	public void addListenerOnRecordButton() {
-		rec = (ImageButton) findViewById(R.id.recordButton);
-		recButtonEnabled=0;
-		
-		rec.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (recButtonEnabled == 0){
-					Toast toast = Toast.makeText(getApplicationContext(), "Select 'My Line' or 'Other Line' to record", 2700);
-					toast.setGravity(Gravity.CENTER, 0, 0);
-					TextView viewtext = (TextView) toast.getView().findViewById(android.R.id.message);
-					if( viewtext!=null) viewtext.setGravity(Gravity.CENTER);
-					toast.show();
-				} else {
-					if(isRecording == 0){
-						isRecording = 1;
-						startRecording();
-						rec.setImageResource(R.drawable.stop_button);
-					} else if (isRecording ==1){
-						isRecording = 0;
-						stopRecording();
-//						myAudioRecorder.release();
-						rec.setImageResource(R.drawable.record_button_gray);
-						recButtonEnabled = 0;
-						me.setBackgroundColor(meUnpressed);
-						them.setBackgroundColor(themUnpressed);
-					}
-				}
-			}
-		});
-	}
+//	public void addListenerOnRecordButton() {
+//		rec = (ImageButton) findViewById(R.id.recordButton);
+//		recButtonEnabled=0;
+//		
+//		rec.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				if (recButtonEnabled == 0){
+//					Toast toast = Toast.makeText(getApplicationContext(), "Select 'My Line' or 'Other Line' to record", 2700);
+//					toast.setGravity(Gravity.CENTER, 0, 0);
+//					TextView viewtext = (TextView) toast.getView().findViewById(android.R.id.message);
+//					if( viewtext!=null) viewtext.setGravity(Gravity.CENTER);
+//					toast.show();
+//				} else {
+//					if(isRecording == 0){
+//						isRecording = 1;
+//						startRecording();
+//						rec.setImageResource(R.drawable.stop_button);
+//					} else if (isRecording ==1){
+//						isRecording = 0;
+//						stopRecording();
+////						myAudioRecorder.release();
+//						rec.setImageResource(R.drawable.record_button_gray);
+//						recButtonEnabled = 0;
+//						me.setBackgroundColor(meUnpressed);
+//						them.setBackgroundColor(themUnpressed);
+//					}
+//				}
+//			}
+//		});
+//	}
 	
 	public void addListenerOnMeButton() {
 		
-		me = (Button) findViewById(R.id.meButton);
+		me = (ImageButton) findViewById(R.id.meButton);
 
 		me.setOnClickListener(new OnClickListener() {
 			   public void onClick(View v) {
-				   them.setBackgroundColor(themUnpressed);
-				   me.setBackgroundResource(R.drawable.me_button_highlighted);
-		    	   if(isRecording==0){
-					   recButtonEnabled = 1;
-					   rec.setImageResource(R.drawable.record_button_red);
-					   myLine=true;
-				   } else {
-					   if (!myLine){
-						   stopRecording();
-						   myLine=true;
-						   startRecording();
-					   }
+				   if (themLineRec){ //other line straight to my line
+					   them.setImageResource(R.drawable.other_line_record_button);
+					   me.setImageResource(R.drawable.my_line_stop_button);
+					   stopRecording();
+					   myLineRec=true;
+					   themLineRec=false;
+					   startRecording();
+				   } else if (myLineRec) { //stop my line recording
+					   me.setImageResource(R.drawable.my_line_record_button);
+					   stopRecording();
+					   myLineRec=false;
+				   } else { //no recording started
+					   myLineRec=true;
+					   me.setImageResource(R.drawable.my_line_stop_button);
+					   startRecording();
 				   }
 			   }
 		});
@@ -409,24 +398,27 @@ public class RecordEdit extends Activity {
 	
 	public void addListenerOnThemButton() {
 		
-		them = (Button) findViewById(R.id.themButton);
+		them = (ImageButton) findViewById(R.id.themButton);
 
 		them.setOnClickListener(new OnClickListener() {
 			   @Override
 			   public void onClick(View v) {
-				   me.setBackgroundColor(meUnpressed);
-				   them.setBackgroundResource(R.drawable.them_button_highlighted);
-				   if(isRecording==0){
-					   recButtonEnabled = 1;
-					   rec.setImageResource(R.drawable.record_button_red);
-					   myLine=false;
-				   } else {
-					   if (myLine){
-						   stopRecording();
-						   myLine=false;
-						   startRecording();
-					   }
-				   } 
+				   if (myLineRec){ //my line straight to other line
+					   me.setImageResource(R.drawable.my_line_record_button);
+					   them.setImageResource(R.drawable.other_line_stop_button);
+					   stopRecording();
+					   myLineRec=false;
+					   themLineRec=true;
+					   startRecording();
+				   } else if (themLineRec) { //stop them line recording
+					   them.setImageResource(R.drawable.other_line_record_button);
+					   stopRecording();
+					   themLineRec=false;
+				   } else { //no recording started
+					   themLineRec=true;
+					   them.setImageResource(R.drawable.other_line_stop_button);
+					   startRecording();
+				   }
 			   }
 		});
 
