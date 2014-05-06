@@ -709,7 +709,7 @@ public class DataStorage {
 			e.printStackTrace();
 			return null;
 		}
-
+		Log.d("LINES", "HERE1");
 		JSONObject chunks = new JSONObject();
 		Comparator<Line> c = new LineComparator();
 		PriorityQueue<Line> h = new PriorityQueue<Line>(10,
@@ -718,7 +718,7 @@ public class DataStorage {
 
 		if (scanner.hasNext()) {
 			linesMap = new LinkedHashMap<String, String>();
-
+			Log.d("LINES", "HERE2");
 			JSONObject lineObject = null;
 			try {
 				chunks = new JSONObject(scanner.next());
@@ -732,26 +732,27 @@ public class DataStorage {
 							lineObject.getString(s), s.split("_")[0]);
 					h.add(l);
 				}
+				Log.d("LINES", Integer.toString(h.size()));
 			} catch (JSONException e) {
 				e.printStackTrace();
 				return null;
 			}
 
-			int lineCounter = 0;
 			while (h.isEmpty() == false) {
 				Line l = h.poll();
-				String s = l.getmActor() + "_" + Integer.toString(lineCounter);
+				String s = l.getmActor() + "_" + Integer.toString(l.getmPosition());
 				try {
 					linesMap.put(
-							l.getmActor() + "_" + Integer.toString(lineCounter),
+							l.getmActor() + "_" + Integer.toString(l.getmPosition()),
 							lineObject.getString(s));
 				} catch (JSONException e) {
 					e.printStackTrace();
 					return null;
 				}
-				lineCounter++;
+				Log.d("LINES", "HERE5");
 			}
 		}
+		Log.d("LINES", Integer.toString(linesMap.size()));
 		return linesMap;
 	}
 
