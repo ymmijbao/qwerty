@@ -18,7 +18,8 @@
             android:layout_marginRight="10dp"
 	        android:layout_marginBottom="10dp"
 	        android:layout_alignParentTop="true"
-	        android:background="#44e179" 
+	        android:background="#2975aa"
+	        android:textColor="#ffffff"
 	        android:text="Rehearse"
             />
         <Button
@@ -28,7 +29,8 @@
             android:layout_alignLeft="@+id/recordEditScrollView"
             android:layout_marginLeft="10dp"
 	        android:layout_marginBottom="10dp"
-	        android:background="#e1445e"
+	        android:background="#2975aa"
+	        android:textColor= "@color/white" 
 	        android:layout_alignParentTop="true"
 	        android:text="Cancel"
             />
