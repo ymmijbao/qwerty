@@ -122,8 +122,15 @@ public class DataStorage {
 
 		// Check if file is empty
 		if (scanner.hasNext()) {
+			String message = "";
+			while (scanner.hasNext()) {
+				message += scanner.next();
+			}
 			try {
-				chunks = new JSONObject(scanner.next());
+				if (message.equals("")) {
+					return -1;
+				}
+				chunks = new JSONObject(message);
 			} catch (JSONException e) {
 				e.printStackTrace();
 				return EXCEPTION;
@@ -318,8 +325,15 @@ public class DataStorage {
 
 		JSONObject chunks = new JSONObject();
 		if (scanner.hasNext()) {
+			String message = "";
+			while (scanner.hasNext()) {
+				message += scanner.next();
+			}
 			try {
-				chunks = new JSONObject(scanner.next());
+				if (message.equals("")) {
+					return -1;
+				}
+				chunks = new JSONObject(message);
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
 				Log.d("DATASTORAGE", "checkpoint1.1");
 				Log.d("DATASTORAGE",
@@ -513,7 +527,14 @@ public class DataStorage {
 
 		if (scanner.hasNext()) {
 			try {
-				chunks = new JSONObject(scanner.next());
+				String message = "";
+				while (scanner.hasNext()) {
+					message += scanner.next();
+				}
+				if (message.equals("")) {
+					return -1;
+				}
+				chunks = new JSONObject(message);
 
 				if (chunks.has(chunk) == false) {
 					return -1;
@@ -583,8 +604,15 @@ public class DataStorage {
 		JSONObject chunks = new JSONObject();
 
 		if (scanner.hasNext()) {
+			String message = "";
+			while (scanner.hasNext()) {
+				message += scanner.next();
+			}
 			try {
-				chunks = new JSONObject(scanner.next());
+				if (message.equals("")) {
+					return -1;
+				}
+				chunks = new JSONObject(message);
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
 				JSONObject lineObject = specificChunk.getJSONObject("lines");
 
