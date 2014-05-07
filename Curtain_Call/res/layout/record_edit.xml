@@ -18,8 +18,9 @@
             android:layout_marginRight="10dp"
 	        android:layout_marginBottom="10dp"
 	        android:layout_alignParentTop="true"
-	        android:background="#44e179" 
-	        android:text="Save"
+	        android:background="#2975aa"
+	        android:textColor="#ffffff"
+	        android:text="Rehearse"
             />
         <Button
             android:id="@+id/cancelRecordingButton"
@@ -28,7 +29,8 @@
             android:layout_alignLeft="@+id/recordEditScrollView"
             android:layout_marginLeft="10dp"
 	        android:layout_marginBottom="10dp"
-	        android:background="#e1445e"
+	        android:background="#2975aa"
+	        android:textColor= "@color/white" 
 	        android:layout_alignParentTop="true"
 	        android:text="Cancel"
             />
@@ -37,7 +39,7 @@
     <ScrollView
         android:id="@+id/recordEditScrollView"
         android:layout_width="fill_parent"
-        android:layout_height="300dp"
+        android:layout_height="320dp"
         android:layout_marginBottom="10dp"
         android:layout_below="@id/saveRecordingButton"
         android:background="@drawable/scrollview_rounded_corners" >
@@ -51,29 +53,31 @@
         </LinearLayout>
     </ScrollView>
 
-    <Button
+    <ImageButton
         android:id="@+id/meButton"
         android:layout_width="100dp"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
+        android:scaleType="fitCenter"
         android:layout_alignLeft="@+id/recordEditScrollView"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
-        android:background="#faebd7"
-        android:text="My line"/>
+        android:src="@drawable/my_line_record_button"
+        android:background="@null"/>
     
-    <Button
+    <ImageButton
         android:id="@+id/themButton"
         android:layout_width="100dp"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/other_line_record_button"
         android:layout_alignBaseline="@+id/meButton"
         android:layout_alignBottom="@+id/meButton"
         android:layout_alignRight="@+id/recordEditScrollView"
         android:layout_marginRight="10dp"
-        android:background="#f8b294"
-        android:text="Other line" />
+        android:background="@null" />
     
-    <ImageButton
+   <!--  <ImageButton
         android:id="@+id/recordButton"
         android:layout_width="75dp"
         android:layout_height="wrap_content"
@@ -83,6 +87,6 @@
         android:layout_centerHorizontal="true"
         android:src="@drawable/record_button_gray"
         android:enabled="false"
-        android:background="@null"/>
+        android:background="@null"/> -->
 
 </RelativeLayout>

@@ -1,6 +1,7 @@
 package com.qwerty.curtaincall;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -16,13 +17,19 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -34,31 +41,30 @@ import android.widget.Toast;
 
 import com.qwerty.data.DataStorage;
 
-public class RecordEdit extends Activity {
+public class RecordEdit extends Activity implements OnClickListener {
+	
+	HashMap<Integer, String> hash = new HashMap<Integer, String>(); // used to map tags to recording name strings
 	
 	private RelativeLayout mainLayout;
 	private LinearLayout scrollLinLayout;
 	
-	Button me;
-	Button them;
+	ImageButton me, them;
 	Button save, cancel;
-	ImageButton rec;
 
 	int lineIndex = 1;
-	int isRecording;
-	int recButtonEnabled;
-	int meDepressed=0xffebae5d;
-	int meUnpressed=0xfffaebd7;
-	int themDepressed=0xffe04e0f;
-	int themUnpressed=0xfff8b294;
 	
 	private MediaPlayer mediaPlayer;
 	
+	
 	String playName, chunkName, value;
-	boolean myLine;
+	boolean myLineRec, themLineRec;
 	
 	private MediaRecorder myAudioRecorder;
 	private String outputFile = null;
+	
+	private GestureDetector gestureDetector;
+	private View viewTouched; // This keeps track of which Button you selected
+	View.OnTouchListener gestureListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,9 +88,19 @@ public class RecordEdit extends Activity {
 		// Set up the listeners
 		addListenerOnMeButton();
 		addListenerOnThemButton();
-		addListenerOnRecordButton();
 		addListenerOnSaveButton();
 		addListenerOnCancelButton();
+		
+		// swipe to delete functionality
+		gestureDetector = new GestureDetector(RecordEdit.this, new MyGestureDetector());
+		gestureListener = new View.OnTouchListener() {
+		        
+			public boolean onTouch(View v, MotionEvent event) {
+				viewTouched = v; // So I kept track of which Vie
+				gestureDetector.onTouchEvent(event);
+			    return false;
+			}
+		};
 		
 		// Set up audio recorder
 		
@@ -105,16 +121,8 @@ public class RecordEdit extends Activity {
 		myAudioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 	    myAudioRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 	    myAudioRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
-//		try {
-//	         myAudioRecorder.prepare();
-//	      } catch (IllegalStateException e) {
-//	         // TODO Auto-generated catch block
-//	         e.printStackTrace();
-//	      } catch (IOException e) {
-//	         // TODO Auto-generated catch block
-//	         e.printStackTrace();
-//	      }
-		if (myLine){
+
+		if (myLineRec){
 			outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/CurtainCall/myLine" + System.currentTimeMillis() + ".3gp";
 		} else {
 			outputFile = Environment.getExternalStorageDirectory().getAbsolutePath() + "/CurtainCall/theirLine" + System.currentTimeMillis()+ ".3gp";
@@ -142,18 +150,13 @@ public class RecordEdit extends Activity {
 			toast.show();
 			myAudioRecorder.release();
 			myAudioRecorder = null;
-			isRecording = 0;
-			rec.setImageResource(R.drawable.record_button_gray);
-			recButtonEnabled = 0;
-			me.setBackgroundColor(meUnpressed);
-			them.setBackgroundColor(themUnpressed);
 			DataStorage.deleteLine(playName, chunkName, lineIndex - 1);
 			return;
 		}
 		myAudioRecorder.release();
 		myAudioRecorder = null;
 		final Button newLine = new Button(RecordEdit.this);
-		if (myLine){
+		if (myLineRec){
 			int result = DataStorage.addLine(playName, chunkName, outputFile, "me");
 			Log.d("RECORDEDIT", "attempting to add button for output: " + outputFile);
 			Log.d("RECORDEDIT", "success?: " + result);
@@ -166,33 +169,14 @@ public class RecordEdit extends Activity {
 			newLine.setBackgroundColor(0xfff8b294);
 			value = lineIndex + ": Other Line";
 		}
+		hash.put(new Integer(lineIndex - 1), outputFile);
+		newLine.setTag(new Integer(lineIndex - 1));
 		lineIndex++;
 		newLine.setGravity(Gravity.LEFT);
+		newLine.setOnTouchListener(gestureListener);
 		final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 		layoutParams.setMargins(0, 10, 0, 0);
 		newLine.setText(value);
-		final String tempFile = outputFile;
-		//clickable newLine buttons
-		newLine.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v){
-				try {
-					playAudio(tempFile);
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalStateException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		});
 		
 		scrollLinLayout.addView(newLine, layoutParams);
 		final ScrollView scroll = (ScrollView) findViewById(R.id.recordEditScrollView);
@@ -241,29 +225,12 @@ public class RecordEdit extends Activity {
 				newLine.setBackgroundColor(0xfff8b294);
 				value = lineIndex + ": Other Line";
 			}
+			hash.put(new Integer(lineIndex - 1), lineAudio);
+			newLine.setTag(lineIndex - 1);
+			newLine.setOnTouchListener(gestureListener);
 			lineIndex++;
 			newLine.setGravity(Gravity.LEFT);
-			final String tempFile = lineAudio;
-            newLine.setOnClickListener(new OnClickListener(){
-                    @Override
-                    public void onClick(View v){
-                            try {
-                                    playAudio(tempFile);
-                            } catch (IllegalArgumentException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                            } catch (SecurityException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                            } catch (IllegalStateException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                            } catch (IOException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                            }
-                    }
-            });
+
 			final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 			layoutParams.setMargins(0, 10, 0, 0);
 			newLine.setText(value);
@@ -351,56 +318,29 @@ public class RecordEdit extends Activity {
 		});
 	}
 	
-	public void addListenerOnRecordButton() {
-		rec = (ImageButton) findViewById(R.id.recordButton);
-		recButtonEnabled=0;
-		
-		rec.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (recButtonEnabled == 0){
-					Toast toast = Toast.makeText(getApplicationContext(), "Select 'My Line' or 'Other Line' to record", 2700);
-					toast.setGravity(Gravity.CENTER, 0, 0);
-					TextView viewtext = (TextView) toast.getView().findViewById(android.R.id.message);
-					if( viewtext!=null) viewtext.setGravity(Gravity.CENTER);
-					toast.show();
-				} else {
-					if(isRecording == 0){
-						isRecording = 1;
-						startRecording();
-						rec.setImageResource(R.drawable.stop_button);
-					} else if (isRecording ==1){
-						isRecording = 0;
-						stopRecording();
-//						myAudioRecorder.release();
-						rec.setImageResource(R.drawable.record_button_gray);
-						recButtonEnabled = 0;
-						me.setBackgroundColor(meUnpressed);
-						them.setBackgroundColor(themUnpressed);
-					}
-				}
-			}
-		});
-	}
+
 	
 	public void addListenerOnMeButton() {
 		
-		me = (Button) findViewById(R.id.meButton);
+		me = (ImageButton) findViewById(R.id.meButton);
 
 		me.setOnClickListener(new OnClickListener() {
 			   public void onClick(View v) {
-				   them.setBackgroundColor(themUnpressed);
-				   me.setBackgroundResource(R.drawable.me_button_highlighted);
-		    	   if(isRecording==0){
-					   recButtonEnabled = 1;
-					   rec.setImageResource(R.drawable.record_button_red);
-					   myLine=true;
-				   } else {
-					   if (!myLine){
-						   stopRecording();
-						   myLine=true;
-						   startRecording();
-					   }
+				   if (themLineRec){ //other line straight to my line
+					   them.setImageResource(R.drawable.other_line_record_button);
+					   me.setImageResource(R.drawable.my_line_stop_button);
+					   stopRecording();
+					   myLineRec=true;
+					   themLineRec=false;
+					   startRecording();
+				   } else if (myLineRec) { //stop my line recording
+					   me.setImageResource(R.drawable.my_line_record_button);
+					   stopRecording();
+					   myLineRec=false;
+				   } else { //no recording started
+					   myLineRec=true;
+					   me.setImageResource(R.drawable.my_line_stop_button);
+					   startRecording();
 				   }
 			   }
 		});
@@ -409,26 +349,114 @@ public class RecordEdit extends Activity {
 	
 	public void addListenerOnThemButton() {
 		
-		them = (Button) findViewById(R.id.themButton);
+		them = (ImageButton) findViewById(R.id.themButton);
 
 		them.setOnClickListener(new OnClickListener() {
 			   @Override
 			   public void onClick(View v) {
-				   me.setBackgroundColor(meUnpressed);
-				   them.setBackgroundResource(R.drawable.them_button_highlighted);
-				   if(isRecording==0){
-					   recButtonEnabled = 1;
-					   rec.setImageResource(R.drawable.record_button_red);
-					   myLine=false;
-				   } else {
-					   if (myLine){
-						   stopRecording();
-						   myLine=false;
-						   startRecording();
-					   }
-				   } 
+				   if (myLineRec){ //my line straight to other line
+					   me.setImageResource(R.drawable.my_line_record_button);
+					   them.setImageResource(R.drawable.other_line_stop_button);
+					   stopRecording();
+					   myLineRec=false;
+					   themLineRec=true;
+					   startRecording();
+				   } else if (themLineRec) { //stop them line recording
+					   them.setImageResource(R.drawable.other_line_record_button);
+					   stopRecording();
+					   themLineRec=false;
+				   } else { //no recording started
+					   themLineRec=true;
+					   them.setImageResource(R.drawable.other_line_stop_button);
+					   startRecording();
+				   }
 			   }
 		});
 
 	}
+	
+	public class MyGestureDetector extends SimpleOnGestureListener {
+		private static final int SWIPE_MIN_DIST = 100;
+		private static final int SWIPE_MAX_OFF_PATH = 250;
+		private static final int SWIPE_THRESHOLD_VELOCITY = 180;
+		
+		@Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            try {            	
+                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) return false;
+
+                if (e2.getX() - e1.getX() > SWIPE_MIN_DIST && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                	/** Adding a Alert Dialog to ask the user if he/she really wants to delete the play **/
+    			    AlertDialog.Builder alert = new AlertDialog.Builder(RecordEdit.this);
+    			    alert.setMessage("Permanently delete recording?");
+    			    
+    			    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+    			    	public void onClick(DialogInterface dialog, int whichButton) {
+    	                	final LinearLayout layout = (LinearLayout) findViewById(R.id.recordEditLinearLayout);
+    	                	final Animation animation = AnimationUtils.loadAnimation(RecordEdit.this, android.R.anim.slide_out_right); 
+    	                    viewTouched.startAnimation(animation);
+    	                    Handler handle = new Handler();
+    	                    handle.postDelayed(new Runnable() {
+    	               
+    	                      @Override
+    	                        public void run() {
+    	                    	  	if (viewTouched != null) {
+    	                    	  		DataStorage.deleteLine(playName, chunkName, (Integer) viewTouched.getTag());
+    	                    	  		layout.removeView(viewTouched);
+    	                    	  		viewTouched = null;
+    	                    	  	}
+    	                            animation.cancel();
+    	                        }
+    	                    }, 300);
+    			        }
+    			    });
+
+    			    alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+    			        public void onClick(DialogInterface dialog, int whichButton) {
+    			            dialog.cancel();
+    			        }
+    			    });
+    			    
+    			    alert.show();    	
+                } 
+            } catch (Exception e) {
+                // Do nothing
+            }
+            
+            return false;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+        	return true;
+        }
+        
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+        	try {
+        		String tempFile = hash.get((Integer) viewTouched.getTag());
+				playAudio(tempFile);
+			} catch (IllegalArgumentException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (SecurityException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IllegalStateException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        	return true;
+        }
+    }
+
+	@Override
+	public void onClick(View arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

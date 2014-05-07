@@ -1,10 +1,13 @@
 package com.qwerty.data;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -27,7 +30,7 @@ public class DataStorage {
 
 	public static final int EXISTS = -1;
 	public static final int EXCEPTION = -1;
-	
+
 	/**
 	 * Add a new play to the storage Returns 0 if the save was successful, -1
 	 * otherwise
@@ -104,7 +107,7 @@ public class DataStorage {
 		if (!f.exists()) {
 			return -1;
 		}
-		
+
 		Scanner scanner = null;
 		try {
 			scanner = new Scanner(new File(f.getAbsolutePath()))
@@ -134,7 +137,7 @@ public class DataStorage {
 		JSONObject lineObject = new JSONObject();
 		try {
 			lineObject.put("position", position);
-			lineObject.put("counter", 0); 
+			lineObject.put("counter", 0);
 			lineObject.put("lines", new JSONObject());
 			chunks.put(chunk, lineObject);
 			writeToFile("plays/play_" + parent, chunks.toString());
@@ -153,6 +156,135 @@ public class DataStorage {
 		return 0;
 	}
 
+	/**
+	 * Pass in the current name of the play into @param oldName and the 
+	 * desired name of the play as @param newName
+	 * @return 0 if successful, non zero otherwise
+	 */
+	public static int renamePlay(String oldName, String newName) {
+		String dir = getJsonDirectory();
+		dir += "/Play.txt";
+
+		File f = new File(dir);
+		if (!f.exists()) {
+			return -1;
+		}
+		
+		FileChannel src;
+		FileChannel dest;
+		
+		try {
+			Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+					.useDelimiter("\\Z");
+
+			JSONObject allPlays = new JSONObject();
+			if (scanner.hasNext()) {
+				allPlays = new JSONObject(scanner.next());
+				// If new name play exists or old play doesn't exist
+				if (allPlays.has(newName) || allPlays.has(oldName) == false) {
+					return -1;
+				}
+				// Else delete the old one and replace it w/ the new name
+				String oldPlayPath = allPlays.getString(oldName);
+
+				allPlays.remove(oldName);
+
+				File playFile = new File(getJsonDirectory() + "/plays/play_"
+						+ oldName + ".txt");
+
+				File newFile = new File(getJsonDirectory() + "/plays/play_"
+						+ newName + ".txt");
+				newFile.createNewFile();
+
+				// Copy contents of original file into new file
+				src = new FileInputStream(playFile).getChannel();
+				dest = new FileOutputStream(newFile).getChannel();
+				dest.transferFrom(src, 0, src.size());
+
+				try {
+					src.close();
+					dest.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+					return -1;
+				}
+				
+				// Delete the old file and put in new file path into play.txt
+				playFile.delete();
+				allPlays.put(newName, newFile.getAbsolutePath());
+			}
+
+			writeToFile("Play", allPlays.toString());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return 0;
+	}
+	
+	
+	/**
+	 * Pass in the current name of the play into @param oldName and the 
+	 * desired name of the play as @param newName
+	 * @return 0 if successful, non zero otherwise
+	 */
+	public static int renameChunk(String play, String oldName, String newName) {
+		String dir = getJsonDirectory();
+		dir += "/plays/play_" + play + ".txt";
+
+		File f = new File(dir);
+		if (!f.exists()) {
+			return -1;
+		}
+		
+		FileChannel src;
+		FileChannel dest;
+		
+		try {
+			Scanner scanner = new Scanner(new File(f.getAbsolutePath()))
+					.useDelimiter("\\Z");
+
+			JSONObject allChunks = new JSONObject();
+			if (scanner.hasNext()) {
+				allChunks = new JSONObject(scanner.next());
+				// If new name play exists or old play doesn't exist
+				if (allChunks.has(newName) || allChunks.has(oldName) == false) {
+					return -1;
+				}
+				// Save json object associated with old name
+				JSONObject oldObj = allChunks.getJSONObject(oldName);
+				
+				allChunks.remove(oldName);
+				
+				// Then put in the new name
+				allChunks.put(newName, oldObj);
+				writeToFile("plays/play_" + play, allChunks.toString());
+			} else {
+				return -1;
+			}
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return 0;
+	}
+
+	
 	/**
 	 * Adds a specific recording/line to the play and chunk specified.
 	 * 
@@ -189,7 +321,8 @@ public class DataStorage {
 				chunks = new JSONObject(scanner.next());
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
 				Log.d("DATASTORAGE", "checkpoint1.1");
-				Log.d("DATASTORAGE", "Printing specificChunk: " + specificChunk.toString());
+				Log.d("DATASTORAGE",
+						"Printing specificChunk: " + specificChunk.toString());
 				int counter = specificChunk.getInt("counter");
 				Log.d("DATASTORAGE", "checkpoint1.2");
 				String actorKey = actor + "_" + counter;
@@ -250,7 +383,7 @@ public class DataStorage {
 				playList.add((String) i.next());
 			}
 		}
-		
+
 		return playList;
 	}
 
@@ -279,7 +412,7 @@ public class DataStorage {
 			e.printStackTrace();
 			return EXCEPTION;
 		}
-
+		
 		JSONObject chunks = new JSONObject();
 
 		if (scanner.hasNext()) {
@@ -298,43 +431,43 @@ public class DataStorage {
 				String currentChunk = chunkList.next();
 				JSONObject obj;
 				try {
-					
+
 					obj = chunks.getJSONObject(currentChunk);
-					Iterator<String> lineIterator = ((JSONObject) obj.get("lines"))
-							.keys();
+					Iterator<String> lineIterator = ((JSONObject) obj
+							.get("lines")).keys();
 					while (lineIterator.hasNext()) {
-						// Get each line audio file and delete it from the device.
+						// Get each line audio file and delete it from the
+						// device.
+						String path = obj.getJSONObject("lines").getString(lineIterator.next());
+						File lineFile = new File(path);
+						lineFile.delete();
 					}
-					
-					
+
 				} catch (JSONException e) {
 					e.printStackTrace();
 					return EXCEPTION;
 				}
 
-
 			}
 			scanner.close();
 
 		}
-		
+
 		boolean deleteSuccess = f.delete();
 
 		if (!deleteSuccess) {
 			return -1;
 		}
-		
-		
 
 		// Now we need to delete entry from Play.txt
 		ArrayList<String> playList = new ArrayList<String>();
 		String fileDirPath = getJsonDirectory();
 		f = new File(fileDirPath + "/play.txt");
 		JSONObject jsonObject;
-		
+
 		try {
 			scanner = new Scanner(new File(f.getAbsolutePath()))
-			.useDelimiter("\\Z");
+					.useDelimiter("\\Z");
 			if (scanner.hasNext()) {
 				jsonObject = new JSONObject(scanner.next());
 				jsonObject.remove(play);
@@ -380,25 +513,25 @@ public class DataStorage {
 		if (scanner.hasNext()) {
 			try {
 				chunks = new JSONObject(scanner.next());
-				
+
 				if (chunks.has(chunk) == false) {
 					return -1;
 				}
-				
+
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
-				
+
 				Iterator<String> lineIterator = ((JSONObject) specificChunk
 						.get("lines")).keys();
 				while (lineIterator.hasNext()) {
-					String audioFilePath = lineIterator.next();
-					// Add code here to remove file
+					String path = specificChunk.getJSONObject("lines").getString(lineIterator.next());
+					File lineFile = new File(path);
+					lineFile.delete();
 				}
-				
+
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 
 		} else {
 			return -1;
@@ -418,10 +551,10 @@ public class DataStorage {
 	}
 
 	/**
-	 * Delets a line from the given play and chunk, at the position the
-	 * user selected to delete. For example, if there are 4 lines total in 
-	 * the chunk and the user chooses to delete the first one, @param position
-	 * would be 0, regardless of whether it was truly the first recorded line or not.
+	 * Delets a line from the given play and chunk, at the position the user
+	 * selected to delete. For example, if there are 4 lines total in the chunk
+	 * and the user chooses to delete the first one, @param position would be 0,
+	 * regardless of whether it was truly the first recorded line or not.
 	 */
 	public static int deleteLine(String play, String chunk, int position) {
 		// Input sanitization
@@ -453,7 +586,7 @@ public class DataStorage {
 				chunks = new JSONObject(scanner.next());
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
 				JSONObject lineObject = specificChunk.getJSONObject("lines");
-				
+
 				PriorityQueue<Line> h = new PriorityQueue<Line>(10,
 						new LineComparator());
 				Iterator<String> i = lineObject.keys();
@@ -464,12 +597,10 @@ public class DataStorage {
 							lineObject.getString(s), s.split("_")[0]);
 					h.add(l);
 				}
-				
-				
-				
+
 				int currentLine = 0;
 				boolean positionFound = false;
-				
+
 				// Delete the item at index POSITION from priority queue
 				while (h.isEmpty() == false) {
 					Line l = h.poll();
@@ -488,7 +619,7 @@ public class DataStorage {
 				if (positionFound == false) {
 					return -1;
 				}
-				
+
 				specificChunk.put("lines", lineObject);
 				chunks.put(chunk, specificChunk);
 				writeToFile("plays/play_" + play, chunks.toString());
@@ -578,7 +709,7 @@ public class DataStorage {
 			e.printStackTrace();
 			return null;
 		}
-
+		Log.d("LINES", "HERE1");
 		JSONObject chunks = new JSONObject();
 		Comparator<Line> c = new LineComparator();
 		PriorityQueue<Line> h = new PriorityQueue<Line>(10,
@@ -587,7 +718,7 @@ public class DataStorage {
 
 		if (scanner.hasNext()) {
 			linesMap = new LinkedHashMap<String, String>();
-			
+			Log.d("LINES", "HERE2");
 			JSONObject lineObject = null;
 			try {
 				chunks = new JSONObject(scanner.next());
@@ -601,25 +732,27 @@ public class DataStorage {
 							lineObject.getString(s), s.split("_")[0]);
 					h.add(l);
 				}
+				Log.d("LINES", Integer.toString(h.size()));
 			} catch (JSONException e) {
 				e.printStackTrace();
 				return null;
 			}
 
-			int lineCounter = 0;
 			while (h.isEmpty() == false) {
 				Line l = h.poll();
-				String s = l.getmActor() + "_" + Integer.toString(lineCounter);
+				String s = l.getmActor() + "_" + Integer.toString(l.getmPosition());
 				try {
-					linesMap.put(l.getmActor() + "_" + Integer.toString(lineCounter),
+					linesMap.put(
+							l.getmActor() + "_" + Integer.toString(l.getmPosition()),
 							lineObject.getString(s));
 				} catch (JSONException e) {
 					e.printStackTrace();
 					return null;
 				}
-				lineCounter++;
+				Log.d("LINES", "HERE5");
 			}
 		}
+		Log.d("LINES", Integer.toString(linesMap.size()));
 		return linesMap;
 	}
 

@@ -101,18 +101,7 @@ public class PlaySelector extends Activity implements OnClickListener {
 		newPlay.setTextColor(0xffffffff);
 		newPlay.setText(playName);
 		newPlay.setTag(playName);
-		
-		/** To go to the next corresponding screen to add/edit recordings **/
-//		newPlay.setOnClickListener(new Button.OnClickListener() {
-//
-//			@Override
-//			public void onClick(View view) {
-//				Intent intent = new Intent(PlaySelector.this, ChunkSelector.class);
-//				intent.putExtra("play", (CharSequence) view.getTag());
-//				startActivity(intent);
-//			}
-//		});
-		
+				
 		/** To rename the play name once it has been created **/
 		newPlay.setOnLongClickListener(new Button.OnLongClickListener() {
 
@@ -126,6 +115,7 @@ public class PlaySelector extends Activity implements OnClickListener {
 			    	
 			        public void onClick(DialogInterface dialog, int whichButton) {
 			            String value = input.getText().toString().trim();
+			            DataStorage.renamePlay((String) newPlay.getText(), value);
 			            newPlay.setText(value);
 			            newPlay.setTag(value);
 			        }
