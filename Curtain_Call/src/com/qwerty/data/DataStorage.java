@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -121,8 +122,15 @@ public class DataStorage {
 
 		// Check if file is empty
 		if (scanner.hasNext()) {
+			String message = "";
+			while (scanner.hasNext()) {
+				message += scanner.next();
+			}
 			try {
-				chunks = new JSONObject(scanner.next());
+				if (message.equals("")) {
+					return -1;
+				}
+				chunks = new JSONObject(message);
 			} catch (JSONException e) {
 				e.printStackTrace();
 				return EXCEPTION;
@@ -317,8 +325,15 @@ public class DataStorage {
 
 		JSONObject chunks = new JSONObject();
 		if (scanner.hasNext()) {
+			String message = "";
+			while (scanner.hasNext()) {
+				message += scanner.next();
+			}
 			try {
-				chunks = new JSONObject(scanner.next());
+				if (message.equals("")) {
+					return -1;
+				}
+				chunks = new JSONObject(message);
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
 				Log.d("DATASTORAGE", "checkpoint1.1");
 				Log.d("DATASTORAGE",
@@ -512,7 +527,14 @@ public class DataStorage {
 
 		if (scanner.hasNext()) {
 			try {
-				chunks = new JSONObject(scanner.next());
+				String message = "";
+				while (scanner.hasNext()) {
+					message += scanner.next();
+				}
+				if (message.equals("")) {
+					return -1;
+				}
+				chunks = new JSONObject(message);
 
 				if (chunks.has(chunk) == false) {
 					return -1;
@@ -551,7 +573,7 @@ public class DataStorage {
 	}
 
 	/**
-	 * Delets a line from the given play and chunk, at the position the user
+	 * Deletes a line from the given play and chunk, at the position the user
 	 * selected to delete. For example, if there are 4 lines total in the chunk
 	 * and the user chooses to delete the first one, @param position would be 0,
 	 * regardless of whether it was truly the first recorded line or not.
@@ -582,8 +604,15 @@ public class DataStorage {
 		JSONObject chunks = new JSONObject();
 
 		if (scanner.hasNext()) {
+			String message = "";
+			while (scanner.hasNext()) {
+				message += scanner.next();
+			}
 			try {
-				chunks = new JSONObject(scanner.next());
+				if (message.equals("")) {
+					return -1;
+				}
+				chunks = new JSONObject(message);
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
 				JSONObject lineObject = specificChunk.getJSONObject("lines");
 
@@ -666,8 +695,15 @@ public class DataStorage {
 
 			// Check if file is empty
 			if (scanner.hasNext()) {
+				String message = "";
+				while (scanner.hasNext()) {
+					message += scanner.next();
+				}
 				try {
-					chunks = new JSONObject(scanner.next());
+					if (message.equals("")) {
+						return null;
+					}
+					chunks = new JSONObject(message);
 				} catch (JSONException e) {
 					e.printStackTrace();
 					return null;
@@ -679,6 +715,7 @@ public class DataStorage {
 				}
 			}
 		}
+		Collections.reverse(chunkList);
 		return chunkList;
 	}
 
@@ -717,11 +754,18 @@ public class DataStorage {
 		LinkedHashMap<String, String> linesMap = null;
 
 		if (scanner.hasNext()) {
+			String message = "";
+			while (scanner.hasNext()) {
+				message += scanner.next();
+			}
 			linesMap = new LinkedHashMap<String, String>();
 			Log.d("LINES", "HERE2");
 			JSONObject lineObject = null;
 			try {
-				chunks = new JSONObject(scanner.next());
+				if (message.equals("")) {
+					return null;
+				}
+				chunks = new JSONObject(message);
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
 				lineObject = ((JSONObject) chunks.get(chunk))
 						.getJSONObject("lines");
