@@ -9,10 +9,12 @@
         android:defaultValue="true" />
     
     <!-- Line accuracy feedback -->
+    <!-- 
     <CheckBoxPreference
         android:key="pref_line_feedback"
         android:title="@string/pref_line_feedback"
         android:summary="@string/pref_line_feedback_summ"
         android:defaultValue="true" />
+    -->
     
 </PreferenceScreen>
