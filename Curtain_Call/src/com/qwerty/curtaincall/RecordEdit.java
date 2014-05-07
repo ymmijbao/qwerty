@@ -290,6 +290,11 @@ public class RecordEdit extends Activity implements OnClickListener {
 		cancel.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v){
+				Intent intent = new Intent(RecordEdit.this, ChunkSelector.class);
+				intent.putExtra("play", playName);
+				startActivity(intent);
+				
+				/*// TODO Implement Cancel feature.
 				AlertDialog.Builder alert = new AlertDialog.Builder(RecordEdit.this);
 				alert.setTitle("Cancel Recording");
 				alert.setMessage("Are you sure you want to cancel? Your latest recordings will be deleted.");
@@ -312,7 +317,8 @@ public class RecordEdit extends Activity implements OnClickListener {
 			        }
 			    });
 			    
-			    alert.show(); 
+			    alert.show();
+			    */
 				
 			}
 		});
