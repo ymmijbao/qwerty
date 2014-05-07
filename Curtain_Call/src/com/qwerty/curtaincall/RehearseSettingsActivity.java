@@ -40,7 +40,7 @@ public class RehearseSettingsActivity extends PreferenceActivity {
 	    return true;
 	}
 	*/
-
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Intent upIntent = NavUtils.getParentActivityIntent(this);
@@ -53,7 +53,9 @@ public class RehearseSettingsActivity extends PreferenceActivity {
             NavUtils.navigateUpTo(this, upIntent);
         }
         
-		/*
+        return true;
+        
+        /*
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			NavUtils.navigateUpFromSameTask(this);
@@ -61,9 +63,7 @@ public class RehearseSettingsActivity extends PreferenceActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-		*/
-        
-        return true;
+        */
 	}
 
     public static class MyPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {

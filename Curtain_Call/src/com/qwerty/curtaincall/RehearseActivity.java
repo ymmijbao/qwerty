@@ -33,6 +33,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -57,8 +58,9 @@ public class RehearseActivity extends Activity {
 	
 	/* Rehearsal settings data */
 	private SharedPreferences sharedPref;
-	private boolean omitMyLinesPref; // TODO incorporate
+	private boolean omitMyLinesPref;
 	// private boolean lineFeedbackPref; // TODO incorporate
+	private MyOnSharedPreferenceChangeListener sharedPrefListener;
 	
 	/* Data about this scene's main elements */
 	private String play; // The name of the play.
@@ -79,8 +81,37 @@ public class RehearseActivity extends Activity {
 	
 	
 	
+	/*
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		omitMyLinesPref = sharedPref.getBoolean("pref_omit_my_lines", true);
+		// lineFeedbackPref = prefs.getBoolean("pref_line_feedback", true);
+		updateLineDisplay();
+	}
+	*/
+	@Override
+	protected void onResume() {
+	    super.onResume();
+	    sharedPref.unregisterOnSharedPreferenceChangeListener(sharedPrefListener);
+	}
 	
+	@Override
+	protected void onPause() {
+	    super.onPause();
+	    sharedPref.registerOnSharedPreferenceChangeListener(sharedPrefListener);
+	}
 	
+	/* Updates UI whenever settings are changed. */
+	private class MyOnSharedPreferenceChangeListener implements OnSharedPreferenceChangeListener {
+		public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+			omitMyLinesPref = prefs.getBoolean("pref_omit_my_lines", true);
+			// lineFeedbackPref = prefs.getBoolean("pref_line_feedback", true);
+			updateLineDisplay();
+		}
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,19 +122,16 @@ public class RehearseActivity extends Activity {
 		sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		omitMyLinesPref = sharedPref.getBoolean("pref_omit_my_lines", true);
 		// lineFeedbackPref = sharedPref.getBoolean("pref_line_feedback", true);
-		OnSharedPreferenceChangeListener sharedPrefListener = new OnSharedPreferenceChangeListener() {
-			public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-				omitMyLinesPref = prefs.getBoolean("pref_omit_my_lines", true);
-				// lineFeedbackPref = prefs.getBoolean("pref_line_feedback", true);
-				updateLineDisplay();
-			}
-		};
-		sharedPref.registerOnSharedPreferenceChangeListener(sharedPrefListener);
+		sharedPrefListener = new MyOnSharedPreferenceChangeListener();
+		// sharedPref.registerOnSharedPreferenceChangeListener(sharedPrefListener);
 		
 		// Gather intent data from previous activity.
 		Bundle extras = getIntent().getExtras();
 		play = extras.getString("play");
 		scene = extras.getString("chunk");
+		if (play == null) { // TODO remove (debugging)
+			Log.d("REHEARSEACTIVITY", "play is null");
+		}
 		
 		// Set MediaPlayer-related variables.
 		mIsPlaying = false;
@@ -189,20 +217,19 @@ public class RehearseActivity extends Activity {
 		
 		// MediaPlayer is now going to play.
 		mIsPlaying = true;
-		Toast.makeText(getApplicationContext(), "Playing...", Toast.LENGTH_SHORT).show();
 		
 		// Update UI buttons.
 		final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
 		playButton.setBackground(getResources().getDrawable(R.drawable.pause_button));
 		
 		// Start the MediaPlayer.
+		Toast.makeText(getApplicationContext(), "Playing...", Toast.LENGTH_SHORT).show();
 		mediaPlayer.start();
 	}
 	
 	private void pauseAudio() {
 		// MediaPlayer is now pausing.
 		mIsPlaying = false;
-		Toast.makeText(getApplicationContext(), "Paused.", Toast.LENGTH_SHORT).show();
 		
 		// Update UI buttons.
 		final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
@@ -210,14 +237,16 @@ public class RehearseActivity extends Activity {
 		
 		// Pause the MediaPlayer.
 		if (currentLineTR != null) {
-			mediaPlayer.pause();
+			if (mediaPlayer.isPlaying()) {
+				Toast.makeText(getApplicationContext(), "Paused.", Toast.LENGTH_SHORT).show();
+				mediaPlayer.pause();
+			}
 		}
 	}
 	
 	private void stopAudio() {
 		// MediaPlayer is now stopping.
 		mIsPlaying = false;
-		Toast.makeText(getApplicationContext(), "Stopped.", Toast.LENGTH_SHORT).show();
 		
 		// Update UI buttons.
 		final ImageButton playButton = (ImageButton)findViewById(R.id.button_play);
@@ -225,8 +254,11 @@ public class RehearseActivity extends Activity {
 		
 		// Stop the MediaPlayer.
 		if (currentLineTR != null) {
-			mediaPlayer.stop();
-			mediaPlayer.release();
+			if (mediaPlayer.isPlaying()) {
+				Toast.makeText(getApplicationContext(), "Stopped.", Toast.LENGTH_SHORT).show();
+				mediaPlayer.stop();
+				mediaPlayer.release();
+			}
 		}
 	}
 	
@@ -304,16 +336,19 @@ public class RehearseActivity extends Activity {
 	
 	/* Update how the lines are displayed (blanked out, etc.) */
 	private void updateLineDisplay() {
+		// Toast.makeText(getApplicationContext(), "Calling updateLineDisplay()", Toast.LENGTH_SHORT).show(); // TODO delete (debugging)
 		final TableLayout lineTable = (TableLayout)findViewById(R.id.view_table_lines);
 		for (int i = 0; i < lineTable.getChildCount(); i++) {
 			LineTableRow lineTR = (LineTableRow)(lineTable.getChildAt(i));
 			String lineSpeaker = getSpeaker(lineTR.getLineName());
 			String lineText = "Line " + (lineTR.getLineIndex() + 1);
 			TextView lineTV = (TextView)(lineTR.getChildAt(1));
-			if (lineSpeaker.equals("Me") && omitMyLinesPref)
+			if (lineSpeaker.equals("Me") && omitMyLinesPref) {
 				lineTV.setText(BLANK_LINE);
-			else
+			}
+			else {
 				lineTV.setText(lineText);
+			}
 		}
 	}
 	
@@ -332,6 +367,9 @@ public class RehearseActivity extends Activity {
 		if (currentLineTR != null) {
 			currentLineTR.setBackgroundColor(getResources().getColor(HIGHLIGHT_COLOR));
 			mediaPlayer = createMediaPlayer(currentLineTR);
+			
+			final ScrollView scroll = (ScrollView) findViewById(R.id.view_lines);
+			scroll.scrollTo(0, (int)currentLineTR.getY() - 50);
 		} else {
 			mediaPlayer = null;
 		}

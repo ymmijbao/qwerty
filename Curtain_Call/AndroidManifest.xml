@@ -48,10 +48,10 @@
         <activity
             android:name="com.qwerty.curtaincall.RehearseActivity"
             android:label="@string/title_activity_rehearse"
-            android:parentActivityName="com.qwerty.curtaincall.ChunkSelector" >
+            android:parentActivityName="com.qwerty.curtaincall.RecordEdit" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.qwerty.curtaincall.ChunkSelector" />
+                android:value="com.qwerty.curtaincall.RecordEdit" />
         </activity>
         <activity
             android:name="com.qwerty.curtaincall.RehearseSettingsActivity"
