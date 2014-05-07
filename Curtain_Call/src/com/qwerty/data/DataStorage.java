@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -551,7 +552,7 @@ public class DataStorage {
 	}
 
 	/**
-	 * Delets a line from the given play and chunk, at the position the user
+	 * Deletes a line from the given play and chunk, at the position the user
 	 * selected to delete. For example, if there are 4 lines total in the chunk
 	 * and the user chooses to delete the first one, @param position would be 0,
 	 * regardless of whether it was truly the first recorded line or not.
@@ -679,6 +680,7 @@ public class DataStorage {
 				}
 			}
 		}
+		Collections.reverse(chunkList);
 		return chunkList;
 	}
 
