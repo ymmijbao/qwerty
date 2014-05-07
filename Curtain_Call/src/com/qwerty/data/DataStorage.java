@@ -667,8 +667,15 @@ public class DataStorage {
 
 			// Check if file is empty
 			if (scanner.hasNext()) {
+				String message = "";
+				while (scanner.hasNext()) {
+					message += scanner.next();
+				}
 				try {
-					chunks = new JSONObject(scanner.next());
+					if (message.equals("")) {
+						return null;
+					}
+					chunks = new JSONObject(message);
 				} catch (JSONException e) {
 					e.printStackTrace();
 					return null;
@@ -719,11 +726,18 @@ public class DataStorage {
 		LinkedHashMap<String, String> linesMap = null;
 
 		if (scanner.hasNext()) {
+			String message = "";
+			while (scanner.hasNext()) {
+				message += scanner.next();
+			}
 			linesMap = new LinkedHashMap<String, String>();
 			Log.d("LINES", "HERE2");
 			JSONObject lineObject = null;
 			try {
-				chunks = new JSONObject(scanner.next());
+				if (message.equals("")) {
+					return null;
+				}
+				chunks = new JSONObject(message);
 				JSONObject specificChunk = ((JSONObject) chunks.get(chunk));
 				lineObject = ((JSONObject) chunks.get(chunk))
 						.getJSONObject("lines");
