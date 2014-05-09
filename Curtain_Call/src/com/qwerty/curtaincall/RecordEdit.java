@@ -204,6 +204,14 @@ public class RecordEdit extends Activity implements OnClickListener {
 	   m.setDataSource(file);
 	   m.prepare();
 	   m.start();
+	   int duration = m.getDuration();
+	   int loopIterations = duration / 2000 + 1;
+	   int lineNumber = (Integer) viewTouched.getTag() + 1;
+	   for (int i=0; i < loopIterations; i++)
+	   {
+		   Toast toast = Toast.makeText(getApplicationContext(), "Playing line " + Integer.toString(lineNumber), Toast.LENGTH_SHORT);
+		   toast.show();
+	   }
 	}
 	
 	
