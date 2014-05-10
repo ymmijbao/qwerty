@@ -75,7 +75,8 @@ public class RehearseActivity extends Activity {
 	/* Constants */
 	public static final int LINE_TEXT_SIZE = 20; // The size of the lines in the scene line display, in "scaled pixels" ("sp").
 	public static final String BLANK_LINE = "_______________"; // Represents a blank (omitted) line's text.
-	public static final int HIGHLIGHT_COLOR = R.color.yellow; // Color of the current (highlighted) line.
+	public static final int HIGHLIGHT_COLOR_ME = R.color.speaker_me; // Color of the current (highlighted) line, if the speaker is Me.
+	public static final int HIGHLIGHT_COLOR_THEM = R.color.speaker_other; // Color of the current (highlighted) line, if the speaker is Them.
 	public static final int PLAIN_COLOR = R.color.transparent; // Color of non-highlighted lines.
 	
 	
@@ -223,7 +224,7 @@ public class RehearseActivity extends Activity {
 		playButton.setBackground(getResources().getDrawable(R.drawable.pause_button));
 		
 		// Start the MediaPlayer.
-		Toast.makeText(getApplicationContext(), "Playing...", Toast.LENGTH_SHORT).show();
+		// Toast.makeText(getApplicationContext(), "Playing...", Toast.LENGTH_SHORT).show();
 		mediaPlayer.start();
 	}
 	
@@ -238,7 +239,7 @@ public class RehearseActivity extends Activity {
 		// Pause the MediaPlayer.
 		if (currentLineTR != null) {
 			if (mediaPlayer.isPlaying()) {
-				Toast.makeText(getApplicationContext(), "Paused.", Toast.LENGTH_SHORT).show();
+				// Toast.makeText(getApplicationContext(), "Paused.", Toast.LENGTH_SHORT).show();
 				mediaPlayer.pause();
 			}
 		}
@@ -255,7 +256,7 @@ public class RehearseActivity extends Activity {
 		// Stop the MediaPlayer.
 		if (currentLineTR != null) {
 			if (mediaPlayer.isPlaying()) {
-				Toast.makeText(getApplicationContext(), "Stopped.", Toast.LENGTH_SHORT).show();
+				// Toast.makeText(getApplicationContext(), "Stopped.", Toast.LENGTH_SHORT).show();
 				mediaPlayer.stop();
 				mediaPlayer.release();
 			}
@@ -278,8 +279,10 @@ public class RehearseActivity extends Activity {
 		lineTable.removeAllViews();
 		
 		// Parameters for line UI.
-		TableRow.LayoutParams lpRow = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
+		TableRow.LayoutParams lpRow = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
 		lpRow.setMargins(0, 10, 0, 0);
+		TableLayout.LayoutParams lpSpeaker = new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f);
+		TableLayout.LayoutParams lpLine = new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 0f);
 		
 		// Iterate through the lines, adding them to the display.
 		lineData = new ArrayList<LineTableRow>();
@@ -298,16 +301,20 @@ public class RehearseActivity extends Activity {
 			
 			// The first column represents the speaker (either the user or the "others").
 			TextView speakerTV = new TextView(this);
+			// speakerTV.setLayoutParams(lpSpeaker);
 			speakerTV.setText(lineSpeaker + ":  ");
 			speakerTV.setTextSize(LINE_TEXT_SIZE);
 			speakerTV.setTypeface(Typeface.DEFAULT_BOLD);
 			
 			// The second column represents the actual line.
 			TextView lineTV = new TextView(this);
-			if (lineSpeaker.equals("Me") && omitMyLinesPref)
+			// lineTV.setLayoutParams(lpLine);
+			if (lineSpeaker.equals("Me") && omitMyLinesPref) {
 				lineTV.setText(BLANK_LINE);
-			else
+			}
+			else {
 				lineTV.setText(lineText);
+			}
 			lineTV.setTextSize(LINE_TEXT_SIZE);
 			
 			// Add the above two components into the line table row.
@@ -365,7 +372,11 @@ public class RehearseActivity extends Activity {
 		
 		// Highlight the new current line.
 		if (currentLineTR != null) {
-			currentLineTR.setBackgroundColor(getResources().getColor(HIGHLIGHT_COLOR));
+			if (getSpeaker(currentLineTR.getLineName()).equals("Me")) {
+				currentLineTR.setBackgroundColor(getResources().getColor(HIGHLIGHT_COLOR_ME));
+			} else {
+				currentLineTR.setBackgroundColor(getResources().getColor(HIGHLIGHT_COLOR_THEM));
+			}
 			mediaPlayer = createMediaPlayer(currentLineTR);
 			
 			final ScrollView scroll = (ScrollView) findViewById(R.id.view_lines);
