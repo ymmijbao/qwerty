@@ -16,6 +16,7 @@
     <color name="speaker_other">#f8b294</color> <!-- Used for elements corresponding to "Other" -->
     <color name="text_hint">#404040</color> <!-- Used for hint texts (like in "Add New Play") -->
     <color name="button">#ff2975aa</color> <!-- Used for normal buttons. -->
+    <color name="highlight">#fff0703a</color> <!-- Used for highlight rehearsal. -->
     
     <!-- Other colors (mainly for testing purposes) -->
     <color name="red">#C80000</color>

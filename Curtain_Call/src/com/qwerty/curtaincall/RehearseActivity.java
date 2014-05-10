@@ -75,7 +75,7 @@ public class RehearseActivity extends Activity {
 	/* Constants */
 	public static final int LINE_TEXT_SIZE = 20; // The size of the lines in the scene line display, in "scaled pixels" ("sp").
 	public static final String BLANK_LINE = "_______________"; // Represents a blank (omitted) line's text.
-	public static final int HIGHLIGHT_COLOR_ME = R.color.speaker_me; // Color of the current (highlighted) line, if the speaker is Me.
+	public static final int HIGHLIGHT_COLOR_ME = R.color.speaker_other; // Color of the current (highlighted) line, if the speaker is Me.
 	public static final int HIGHLIGHT_COLOR_THEM = R.color.speaker_other; // Color of the current (highlighted) line, if the speaker is Them.
 	public static final int PLAIN_COLOR = R.color.transparent; // Color of non-highlighted lines.
 	
