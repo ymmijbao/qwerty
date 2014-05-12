@@ -6,6 +6,7 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#777777</color>
+    <color name="lightblue">#cdecfa</color>
     
     <!-- Curtain Call color scheme -->
     <color name="background_selection">#2eb4ed</color> <!-- Background for Play/Chunk Selection screens -->
